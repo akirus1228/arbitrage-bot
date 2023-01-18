@@ -1,8 +1,9 @@
 import React, {Component} from 'react';
 import { Tab, Col, Row, Nav } from 'react-bootstrap';
-import TopNav from './TopNav.js';
-import Display from './Display.jsx';
-import TokenList  from './TokenList.jsx';
+import TopNav from './TopNav';
+import Display from './Display';
+import TokenList  from './TokenList';
+import Contact  from './Contact.jsx';
 import './App.css'
 
 class App extends Component {
@@ -29,6 +30,10 @@ class App extends Component {
                                         </svg>    Token Manage
                                     </Nav.Link> 
                                 </Nav.Item>
+                                <Nav.Item>
+                                    <Nav.Link eventKey="third">Contact
+                                    </Nav.Link> 
+                                </Nav.Item>
                             </Nav>
                         </Col>
                         <Col xs="11">
@@ -38,6 +43,9 @@ class App extends Component {
                                 </Tab.Pane>
                                 <Tab.Pane eventKey="second">
                                     <TokenList />
+                                </Tab.Pane>
+                                <Tab.Pane eventKey="third">
+                                    <Contact />
                                 </Tab.Pane>
                             </Tab.Content>
                         </Col>

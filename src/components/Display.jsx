@@ -32,7 +32,6 @@ const uniSwap_address = uniSwap;
 const sushi_address = sushiSwap;
 const defiSwap_address = defiSwap;
 const Eth_address = wETHAddress;
-let intervalvar;
 
 class Display extends Component {
     constructor(props) {
@@ -140,11 +139,6 @@ class Display extends Component {
         });
         
         this.setState({ tokenLists: updatedTokenLists });
-
-        this.setState({ minAmount: 0 });
-
-        this.setState({ maxAmount: 100 });
-
         this.setState({show: false});
     }
 
