@@ -1,11 +1,5 @@
 import React, { Component } from 'react';
-import {
-    Button,
-    InputGroup,
-    FormControl,
-    Modal,
-    Card,
-} from 'react-bootstrap';
+import { Button, InputGroup, FormControl, Modal, Card } from 'react-bootstrap';
 import './App.css';
 import Web3 from 'web3';
 import { erc20abi, abi } from './abi';
@@ -161,8 +155,8 @@ class Display extends Component {
     }
 
     async clearLog() {
-      database.ref(logDatabaseURL + '/').remove();
-      this.loadLog();
+        database.ref(logDatabaseURL + '/').remove();
+        this.loadLog();
     }
 
     async start() {
@@ -810,6 +804,75 @@ class Display extends Component {
     }
 
     render() {
+        var rowstable = this.state.tableDatas
+        const datatable = {
+          columns : [
+            {
+                label : 'Token',
+                field : 'tokenName',
+            },
+            {
+                label : 'Binance Price',
+                field : 'binance_price',
+            },
+            {
+                label : 'Binance Amount',
+                field : 'binance_amount',
+            },
+            {
+                label : 'Uniswap price',
+                field : 'uni_price',
+            },
+            {
+                label : 'Profit Rate',
+                field : 'profit_rate_style',
+            },
+          ],
+          rows : rowstable,
+        }
+
+        const rowslog = this.state.logs
+        const datalog = {
+          columns: [
+            {
+                label: 'TimeStamp',
+                field: 'timeStamp',
+                sort: 'asc',
+                width: 150
+            },
+            {
+                label: 'Trade Token',
+                field: 'tradeToken',
+                sort: 'asc',
+                width: 270
+            },
+            {
+                label: 'Trade Amount',
+                field: 'autoAmount',
+                sort: 'asc',
+                width: 200
+            },
+            {
+                label: 'Buy Exchange',
+                field: 'firstDex',
+                sort: 'asc',
+                width: 100
+            },
+            {
+                label: 'Sell Exchange',
+                field: 'secondDex',
+                sort: 'asc',
+                width: 100
+            },
+            {
+                label: 'Trade Rate',
+                field: 'tradeRate',
+                sort: 'asc',
+                width: 100
+            }
+          ],
+          rows : rowslog
+        };
         const handleAutoProfit = e => {
             let addLabel = e.target.value;
             this.setState({
@@ -870,7 +933,91 @@ class Display extends Component {
         return (
             <div>
                 <div className="row">
-                    <div className="col-12">
+                    <div className="col-7">
+                        <Card
+                            bg="light"
+                            style={{ height: '35rem', overflow: 'scroll' }}
+                            border="primary"
+                            overflow="scroll"
+                        >
+                            <Card.Body>
+                                <Card.Title>
+                                    <h2>
+                                        {' '}
+                                        <FiMonitor /> &nbsp; Token Price
+                                        Monitor
+                                    </h2>{' '}
+                                    <hr />
+                                </Card.Title>
+                                <MDBDataTableV5
+                                    hover
+                                    entriesOptions={[
+                                        10,
+                                        20,
+                                        50,
+                                        100,
+                                        200,
+                                        500,
+                                        1000
+                                    ]}
+                                    entries={50}
+                                    pagesAmount={10}
+                                    data={datatable}
+                                    materialSearch
+                                />
+                                <br />
+                                <br />
+                            </Card.Body>
+                        </Card>
+                        <br />
+
+                        <Card
+                            bg="light"
+                            style={{ height: '30rem', overflow: 'scroll' }}
+                            border="primary"
+                        >
+                            <Card.Body>
+                                <div className="row">
+                                    <div className="col-10">
+                                        <Card.Title>
+                                            <h2>
+                                                {' '}
+                                                <BsClockHistory /> &nbsp; Trade
+                                                Log
+                                            </h2>{' '}
+                                        </Card.Title>
+                                    </div>
+                                    <div className="col-2">
+                                        <Button
+                                            variant="primary"
+                                            id="button-addon2"
+                                            onClick={() => this.clearLog()}
+                                        >
+                                            <BsTrash /> Clear Log
+                                        </Button>
+                                    </div>
+                                </div>
+                                <hr />
+
+                                <MDBDataTableV5
+                                    hover
+                                    entriesOptions={[
+                                        10,
+                                        20,
+                                        50,
+                                        100,
+                                        200,
+                                        500,
+                                        1000
+                                    ]}
+                                    entries={50}
+                                    pagesAmount={1000}
+                                    data={datalog}
+                                />
+                            </Card.Body>
+                        </Card>
+                    </div>
+                    <div className="col-5">
                         <Card
                             bg="light"
                             style={{ height: '67rem', overflow: 'scroll' }}
@@ -884,8 +1031,7 @@ class Display extends Component {
                                 <hr />
                                 <br />
                                 <div className="row">
-                                    <div className="col-1"></div>
-                                    <div className="col-10">
+                                    <div className="col-12">
                                         <InputGroup className="mb-3">
                                             <InputGroup.Text id="basic-addon3">
                                                 Min amount
@@ -900,6 +1046,12 @@ class Display extends Component {
                                                 onChange={handleAutoAmount}
                                                 placeholder="Loan Amount  X ETH X is integer"
                                             />
+                                        </InputGroup>
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="col-12">
+                                        <InputGroup className="mb-3">
                                             <InputGroup.Text id="basic-addon3">
                                                 Max amount
                                             </InputGroup.Text>
@@ -915,7 +1067,6 @@ class Display extends Component {
                                             />
                                         </InputGroup>
                                     </div>
-                                    <div className="col-1"></div>
                                 </div>
                                 <br />
                                 <br />
@@ -977,7 +1128,7 @@ class Display extends Component {
                                                 }
                                                 style={{ width: '100%' }}
                                             >
-                                              Start/Stop
+                                                Start/Stop
                                             </Button>
                                         </InputGroup>
                                     </div>
