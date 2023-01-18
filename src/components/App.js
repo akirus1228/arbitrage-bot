@@ -31,7 +31,7 @@ class App extends Component {
                                 </Nav.Item>
                             </Nav>
                         </Col>
-                        <Col xs="11" md={{ span: 9 , offset:1 }}>
+                        <Col xs="11">
                             <Tab.Content>
                                 <Tab.Pane eventKey="first">
                                     <Display />

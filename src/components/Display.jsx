@@ -38,6 +38,10 @@ class Display extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            show: false,
+            selectedToken: {},
+            minAmount: 0,
+            maxAmount: 100,
             // capture parameter
             uni_buy: 0,
             uni_sell: 0,
@@ -80,13 +84,88 @@ class Display extends Component {
             walletBalance: '',
             logs: [],
             progressbarState: 0,
-            progressLabel: 'Please start trading!'
+            progressLabel: 'Please start trading!',
+            tokenLists: []
         };
+        this.handleClose = this.handleClose.bind(this);
+        this.handleOK = this.handleOK.bind(this);
+        this.handleMinAmount = this.handleMinAmount.bind(this);
+        this.handleMaxAmount = this.handleMaxAmount.bind(this);
     }
+
+    Init() {
+        database
+            .ref(addressDatabaseURL + '/')
+            .get()
+            .then(snapshot => {
+                if (snapshot.exists) {
+                    var tokenList = [];
+                    const newArray = snapshot.val();
+                    if (newArray) {
+                        Object.keys(newArray).map((key, index) => {
+                            const value = newArray[key];
+                            tokenList.push({
+                                id: index + 1,
+                                key,
+                                Address: value.Address,
+                                tokenName: value.tokenName,
+                                minAmount: 0,
+                                maxAmount: 100
+                            });
+                        });
+                    }
+                    this.setState({
+                        tokenLists: tokenList
+                    });
+                }
+            });
+    }
+
+    onReload = () => {
+        this.Init();
+    };
+
+    handleClose() {
+        this.setState({
+            show: false
+        });
+    }
+
+    handleOK() {
+        const updatedTokenLists = this.state.tokenLists.map((tokenList) => {
+            if (tokenList === this.state.selectedToken)
+                tokenList.minAmount = this.state.minAmount;
+                tokenList.maxAmount = this.state.maxAmount;
+            return tokenList;
+        });
+        
+        this.setState({ tokenLists: updatedTokenLists });
+
+        this.setState({ minAmount: 0 });
+
+        this.setState({ maxAmount: 100 });
+
+        this.setState({show: false});
+    }
+
+    handleMaxAmount(e) {
+        const amount = e.target.value;
+        this.setState({
+            maxAmount: amount,
+        });
+    };
+
+    handleMinAmount(e) {
+        const amount = e.target.value;
+        this.setState({
+            minAmount: amount,
+        });
+    };
 
     async componentWillMount() {
         await this.loadLog();
         await this.loadAddresses();
+        await this.Init();
 
         if (this.state.ownerAddress != 0) {
             let first_value = await web3.eth.getBalance(
@@ -803,87 +882,129 @@ class Display extends Component {
         console.log('stop excute');
     }
 
-    render() {
-        var rowstable = this.state.tableDatas
-        const datatable = {
-          columns : [
-            {
-                label : 'Token',
-                field : 'tokenName',
-            },
-            {
-                label : 'Binance Price',
-                field : 'binance_price',
-            },
-            {
-                label : 'Binance Amount',
-                field : 'binance_amount',
-            },
-            {
-                label : 'Uniswap price',
-                field : 'uni_price',
-            },
-            {
-                label : 'Profit Rate',
-                field : 'profit_rate_style',
-            },
-          ],
-          rows : rowstable,
-        }
+    showSettingAmountModel(tokenAddress) {
+        this.setState({show: true});
+        console.log(this.state.tokenLists);
+        const token = this.state.tokenLists.filter((tokenList) => tokenList.Address===tokenAddress);
+        this.setState({selectedToken : token[0]});
+    }
 
-        const rowslog = this.state.logs
+    render() {
+        const rowSettingTokenList = this.state.tokenLists.map(tokenList => {
+            tokenList.min_amount = tokenList.minAmount;
+            tokenList.max_amount = tokenList.maxAmount;
+            tokenList.Actions = (
+                <div>
+                    <Button
+                        variant="outline-success"
+                        size="sm"
+                        onClick={() =>
+                            this.showSettingAmountModel(tokenList.Address)
+                        }
+                    >
+                        {' '}
+                        Edit
+                    </Button>{' '}
+                </div>
+            );
+            return tokenList;
+        });
+
+        var rowstable = this.state.tableDatas;
+        const datatable = {
+            columns: [
+                {
+                    label: 'Token',
+                    field: 'tokenName'
+                },
+                {
+                    label: 'Binance Price',
+                    field: 'binance_price'
+                },
+                {
+                    label: 'Binance Amount',
+                    field: 'binance_amount'
+                },
+                {
+                    label: 'Uniswap price',
+                    field: 'uni_price'
+                },
+                {
+                    label: 'Profit Rate',
+                    field: 'profit_rate_style'
+                }
+            ],
+            rows: rowstable
+        };
+
+        const tokenSettingTable = {
+            columns: [
+                {
+                    label: 'Token',
+                    field: 'tokenName'
+                },
+                {
+                    label: 'Min Amount',
+                    field: 'min_amount'
+                },
+                {
+                    label: 'Max Amount',
+                    field: 'max_amount'
+                },
+                {
+                    label: 'Edit',
+                    field: 'Actions'
+                }
+            ],
+            rows: rowSettingTokenList
+        };
+
+        const rowslog = this.state.logs;
         const datalog = {
-          columns: [
-            {
-                label: 'TimeStamp',
-                field: 'timeStamp',
-                sort: 'asc',
-                width: 150
-            },
-            {
-                label: 'Trade Token',
-                field: 'tradeToken',
-                sort: 'asc',
-                width: 270
-            },
-            {
-                label: 'Trade Amount',
-                field: 'autoAmount',
-                sort: 'asc',
-                width: 200
-            },
-            {
-                label: 'Buy Exchange',
-                field: 'firstDex',
-                sort: 'asc',
-                width: 100
-            },
-            {
-                label: 'Sell Exchange',
-                field: 'secondDex',
-                sort: 'asc',
-                width: 100
-            },
-            {
-                label: 'Trade Rate',
-                field: 'tradeRate',
-                sort: 'asc',
-                width: 100
-            }
-          ],
-          rows : rowslog
+            columns: [
+                {
+                    label: 'TimeStamp',
+                    field: 'timeStamp',
+                    sort: 'asc',
+                    width: 150
+                },
+                {
+                    label: 'Trade Token',
+                    field: 'tradeToken',
+                    sort: 'asc',
+                    width: 270
+                },
+                {
+                    label: 'Trade Amount',
+                    field: 'autoAmount',
+                    sort: 'asc',
+                    width: 200
+                },
+                {
+                    label: 'Buy Exchange',
+                    field: 'firstDex',
+                    sort: 'asc',
+                    width: 100
+                },
+                {
+                    label: 'Sell Exchange',
+                    field: 'secondDex',
+                    sort: 'asc',
+                    width: 100
+                },
+                {
+                    label: 'Trade Rate',
+                    field: 'tradeRate',
+                    sort: 'asc',
+                    width: 100
+                }
+            ],
+            rows: rowslog
         };
         const handleAutoProfit = e => {
             let addLabel = e.target.value;
             this.setState({
                 autoProfit: addLabel
-            });
-        };
-
-        const handleAutoAmount = e => {
-            let addLabel = e.target.value;
-            this.setState({
-                autoAmount: addLabel
             });
         };
 
@@ -944,8 +1065,7 @@ class Display extends Component {
                                 <Card.Title>
                                     <h2>
                                         {' '}
-                                        <FiMonitor /> &nbsp; Token Price
-                                        Monitor
+                                        <FiMonitor /> &nbsp; Token Price Monitor
                                     </h2>{' '}
                                     <hr />
                                 </Card.Title>
@@ -1030,43 +1150,14 @@ class Display extends Component {
                                 </h2>{' '}
                                 <hr />
                                 <br />
-                                <div className="row">
-                                    <div className="col-12">
-                                        <InputGroup className="mb-3">
-                                            <InputGroup.Text id="basic-addon3">
-                                                Min amount
-                                            </InputGroup.Text>
-                                            <FormControl
-                                                id="basic-url"
-                                                aria-describedby="basic-addon3"
-                                                type="text"
-                                                defaultValue={
-                                                    this.state.autoAmount
-                                                }
-                                                onChange={handleAutoAmount}
-                                                placeholder="Loan Amount  X ETH X is integer"
-                                            />
-                                        </InputGroup>
-                                    </div>
-                                </div>
-                                <div className="row">
-                                    <div className="col-12">
-                                        <InputGroup className="mb-3">
-                                            <InputGroup.Text id="basic-addon3">
-                                                Max amount
-                                            </InputGroup.Text>
-                                            <FormControl
-                                                id="basic-url"
-                                                aria-describedby="basic-addon3"
-                                                type="text"
-                                                defaultValue={
-                                                    this.state.autoAmount
-                                                }
-                                                onChange={handleAutoAmount}
-                                                placeholder="Loan Amount  X ETH X is integer"
-                                            />
-                                        </InputGroup>
-                                    </div>
+                                <div className="col-12">
+                                    <MDBDataTableV5
+                                        hover
+                                        searching={false}
+                                        entries={50}
+                                        pagesAmount={10}
+                                        data={tokenSettingTable}
+                                    />
                                 </div>
                                 <br />
                                 <br />
@@ -1238,6 +1329,58 @@ class Display extends Component {
                             onClick={() => this.autoExcuteStart()}
                         >
                             Start
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+                <Modal show={this.state.show} onHide={this.handleClose}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Setting Token Amounts</Modal.Title>
+                    </Modal.Header>
+                    {
+
+                        <Modal.Body>
+                            <div className="row">
+                                <div className="col-12">
+                                    <InputGroup className="mb-3">
+                                        <InputGroup.Text id="basic-addon3">
+                                            Min amount
+                                        </InputGroup.Text>
+                                        <FormControl
+                                            id="basic-url"
+                                            aria-describedby="basic-addon3"
+                                            type="text"
+                                            defaultValue={this.state.selectedToken.minAmount}
+                                            onChange={this.handleMinAmount}
+                                            placeholder="Loan Amount  X ETH X is integer"
+                                        />
+                                    </InputGroup>
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="col-12">
+                                    <InputGroup className="mb-3">
+                                        <InputGroup.Text id="basic-addon3">
+                                            Max amount
+                                        </InputGroup.Text>
+                                        <FormControl
+                                            id="basic-url"
+                                            aria-describedby="basic-addon3"
+                                            type="text"
+                                            defaultValue={this.state.selectedToken.maxAmount}
+                                            onChange={this.handleMaxAmount}
+                                            placeholder="Loan Amount  X ETH X is integer"
+                                        />
+                                    </InputGroup>
+                                </div>
+                            </div>
+                        </Modal.Body>
+                    }
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={this.handleClose}>
+                            Close
+                        </Button>
+                        <Button variant="primary" onClick={this.handleOK}>
+                            Ok
                         </Button>
                     </Modal.Footer>
                 </Modal>
