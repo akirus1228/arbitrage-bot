@@ -16,7 +16,7 @@ class TokenList extends Component {
             prevAddress: '',
             newAddress: '',
             editKey: '',
-            walletLists: [],
+            cryptos: [],
             show: false
         };
 
@@ -35,97 +35,104 @@ class TokenList extends Component {
         database
             .ref(addressDatabaseURL + '/')
             .get()
-            .then(snapshot => {
-                if (snapshot.exists) {
-                    var tokenList = [];
-                    const newArray = snapshot.val();
-                    if (newArray) {
-                        Object.keys(newArray).map((key, index) => {
-                            const value = newArray[key];
-                            tokenList.push({
+            .then(result => {
+                if (result.exists) {
+                    let tokens = [];
+                    const data = result.val();
+                    if (data) {
+                        Object.keys(data).forEach((key, index) => {
+                            const value = data[key];
+                            tokens.push({
                                 id: index + 1,
                                 key,
-                                Address: value.Address,
+                                address: value.address,
                                 tokenName: value.tokenName,
+                                active: value.active,
                             });
                         });
                     }
                     this.setState({
-                        walletLists: tokenList
+                        cryptos: tokens
                     });
                 }
             });
     }
 
-    onReload = () => {
-        this.Init();
+    onReload = async () => {
+        await this.Init();
     };
 
     closeModal() {
         console.log('close');
     }
 
-    deleteTokenList(id) {
+    async deleteTokenList(id) {
         console.log(id);
         database.ref(addressDatabaseURL + '/' + id).remove();
-        this.Init();
+        await this.Init();
     }
 
-    setTokenActive(id) {
-        console.log(id, this.state.walletLists);
-        const databaseRef = database.ref(addressDatabaseURL + '/' + id);
-        databaseRef.update({active: !databaseRef.active});
-        this.Init();
-    }
-
-    saveWallet() {
-        if (this.state.newAddress == '') {
-            alert('input date');
-            return;
-        }
-
-        const load = {
-            Address: this.state.newAddress,
-            Label: this.state.newLabel
-        };
-        var updates = {};
-        updates[addressDatabaseURL + '/' + this.state.editKey] = load;
-        database
-            .ref()
-            .update(updates)
-            .then(function() {
-                alert('Data saved successfully.');
+    async setTokenActive(id) {
+        const data = this.state.cryptos.filter(i => i.key === id)[0];
+        data.active = !data.active;
+        database.ref(addressDatabaseURL + '/' + id)
+            .update(data)
+            .then(async () => {
+                await this.Init();
             })
-            .catch(function(error) {
-                alert('Data could not be saved.' + error);
-            });
-        this.setState({
-            show: false
-        });
-        this.Init();
+            .catch((error) => alert('Data could not be saved.' + error))
     }
+
+    // saveWallet() {
+    //     if (this.state.newAddress === '') {
+    //         alert('input date');
+    //         return;
+    //     }
+
+    //     const load = {
+    //         address: this.state.newAddress,
+    //         label: this.state.newLabel
+    //     };
+    //     let updates = {};
+    //     updates[addressDatabaseURL + '/' + this.state.editKey] = load;
+    //     console.log("updates: ", updates);
+    //     database
+    //         .ref()
+    //         .update(updates)
+    //         .then(function() {
+    //             alert('Data saved successfully.');
+    //         })
+    //         .catch(function(error) {
+    //             alert('Data could not be saved.' + error);
+    //         });
+    //     this.setState({
+    //         show: false
+    //     });
+    //     this.Init();
+    // }
 
     render() {
-        const rows = this.state.walletLists.map(tokenList => {
-            tokenList.delete = (
+        const rows = this.state.cryptos.map(crypto => {
+            const row = {...crypto};
+            row.delete = (
                 <Button
                     variant="outline-danger"
                     size="sm"
-                    onClick={() => this.deleteTokenList(tokenList.key)}
+                    onClick={() => this.deleteTokenList(crypto.key)}
                 >
                     Delete
                 </Button>
             );
-            tokenList.active = (
+            row.active = (
                 <Button
-                    variant={`${tokenList.active ? "primary" : "danger"}`}
+                    variant={`${crypto.active ? "primary" : "danger"}`}
                     size="sm"
-                    onClick={() => this.setTokenActive(tokenList.key)}
+                    onClick={() => this.setTokenActive(crypto.key)}
                 >
-                    {tokenList.active ? "Active": "Disable"}
+                    {crypto.active ? "Active": "Disable"}
                 </Button>
             );
-            return tokenList;
+            return row;
         });
         const data = {
             columns: [
@@ -169,7 +176,7 @@ class TokenList extends Component {
                 <br />
                 <Example
                     onReload={this.onReload}
-                    walletData={this.state.walletLists}
+                    walletData={this.state.cryptos}
                 />
                 <br />
                 <br />
@@ -204,9 +211,7 @@ function Example(props) {
             addAddress = ethers.utils.getAddress(addAddress);
             try {
                 const tokenContract = new ethers.Contract(addAddress, erc20abi, provider);
-                console.log("tokenContract: ", tokenContract);
                 const tokenName = await tokenContract["symbol"]();
-                console.log("tokenName: ", tokenName);
                 const tokenList = {
                     address: addAddress,
                     tokenName: tokenName,

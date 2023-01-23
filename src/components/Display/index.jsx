@@ -99,18 +99,19 @@ class Display extends Component {
       .then((snapshot) => {
         if (snapshot.exists) {
           var tokenList = [];
-          const newArray = snapshot.val();
-          if (newArray) {
-            Object.keys(newArray).map((key, index) => {
-              const value = newArray[key];
-              tokenList.push({
-                id: index + 1,
-                key,
-                Address: value.Address,
-                tokenName: value.tokenName,
-                minAmount: 0,
-                maxAmount: 100,
-              });
+          const data = snapshot.val();
+          if (data) {
+            Object.keys(data).forEach((key, index) => {
+              const value = data[key];
+              if (value.active) 
+                tokenList.push({
+                  id: index + 1,
+                  key,
+                  Address: value.Address,
+                  tokenName: value.tokenName,
+                  minAmount: 0,
+                  maxAmount: 100,
+                });
             });
           }
           this.setState({
@@ -185,7 +186,7 @@ class Display extends Component {
         Object.keys(newArray).map((key) => {
           const value = newArray[key];
           tokenList.push({
-            Address: ethers.utils.getAddress(value.Address),
+            Address: ethers.utils.getAddress(value.address),
           });
         });
       }
