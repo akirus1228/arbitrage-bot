@@ -1,9 +1,10 @@
-import React, {Component} from 'react';
 import { Tab, Col, Row, Nav } from 'react-bootstrap';
-import TopNav from './TopNav';
-import Display from './Display';
-import TokenList  from './TokenList';
-import Contact  from './Contact.jsx';
+import React, {Component} from 'react';
+
+import TopNav from './components/TopNav';
+import Display from './components/Display';
+import TokenList  from './components/TokenList';
+import Contact  from './components/Contact/index.jsx';
 import './App.css'
 
 class App extends Component {

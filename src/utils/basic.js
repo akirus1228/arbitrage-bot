@@ -2,7 +2,7 @@ export const walletAddress = ""
 export const walletPrivate = ""
 export const addressDatabaseURL  = "MainTokenAddress"
 export const logDatabaseURL = "log"
-export const web3URL = "https://mainnet.infura.io/v3/542f83ff23084a129ef631bb5fe102f1"
+export const RPC_URL="https://mainnet.infura.io/v3/542f83ff23084a129ef631bb5fe102f1";
 export const uniSwap = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"
 export const sushiSwap = "0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F"
 export const defiSwap = "0xCeB90E4C17d626BE0fACd78b79c9c87d7ca181b3"
@@ -13,4 +13,3 @@ export const autoTime = "60000"
 export const autoGasLimit = "500000"
 export const autoGasValue = "50"
 export const autoSlippage = "100"
-

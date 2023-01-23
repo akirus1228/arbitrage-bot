@@ -1,11 +1,13 @@
-import React, { Component, useState } from 'react';
-import { InputGroup, FormControl, Button, Modal } from 'react-bootstrap';
+import { ethers } from 'ethers';
 import { MDBDataTableV5 } from 'mdbreact';
-import { database } from './firebase/firebase';
-import { addressDatabaseURL, web3URL } from './config';
-import { erc20abi } from './abi';
-import Web3 from 'web3';
-const web3 = new Web3(new Web3.providers.HttpProvider(web3URL));
+import { InputGroup, FormControl, Button, Modal } from 'react-bootstrap';
+import React, { Component, useState } from 'react';
+
+import { addressDatabaseURL, RPC_URL } from '../../utils/basic';
+import { database } from '../../config/firebase';
+import { erc20abi } from '../../utils/abis/erc20ABI';
+
+const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
 
 class TokenList extends Component {
     constructor(props) {
@@ -69,8 +71,10 @@ class TokenList extends Component {
         this.Init();
     }
 
-    activeTokenList(id) {
-        console.log(id);
+    setTokenActive(id) {
+        console.log(id, this.state.walletLists);
+        const databaseRef = database.ref(addressDatabaseURL + '/' + id);
+        databaseRef.update({active: !databaseRef.active});
         this.Init();
     }
 
@@ -103,29 +107,23 @@ class TokenList extends Component {
 
     render() {
         const rows = this.state.walletLists.map(tokenList => {
-            tokenList.Actions = (
-                <div>
-                    <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={() => this.deleteTokenList(tokenList.key)}
-                    >
-                        {' '}
-                        Delete
-                    </Button>{' '}
-                </div>
+            tokenList.delete = (
+                <Button
+                    variant="outline-danger"
+                    size="sm"
+                    onClick={() => this.deleteTokenList(tokenList.key)}
+                >
+                    Delete
+                </Button>
             );
-            tokenList.Active = (
-                <div>
-                    <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={() => this.activeTokenList(tokenList.key)}
-                    >
-                        {' '}
-                        Active
-                    </Button>{' '}
-                </div>
+            tokenList.active = (
+                <Button
+                    variant={`${tokenList.active ? "primary" : "danger"}`}
+                    size="sm"
+                    onClick={() => this.setTokenActive(tokenList.key)}
+                >
+                    {tokenList.active ? "Active": "Disable"}
+                </Button>
             );
             return tokenList;
         });
@@ -145,18 +143,18 @@ class TokenList extends Component {
                 },
                 {
                     label: 'Token Address',
-                    field: 'Address',
+                    field: 'address',
                     sort: 'asc',
                     width: 270
                 },
                 {
                     label: 'Active',
-                    field: 'Active',
+                    field: 'active',
                     width: 270
                 },
                 {
                     label: 'Delete',
-                    field: 'Actions',
+                    field: 'delete',
                     sort: 'asc',
                     width: 100
                 }
@@ -192,7 +190,7 @@ class TokenList extends Component {
 export default TokenList;
 
 function Example(props) {
-    var addAddress = '';
+    let addAddress = '';
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -203,25 +201,23 @@ function Example(props) {
             alert('Please check Address');
             return;
         } else {
-            addAddress = web3.utils.toChecksumAddress(addAddress);
+            addAddress = ethers.utils.getAddress(addAddress);
             try {
-                let tokenContract = new web3.eth.Contract(erc20abi, addAddress);
-                console.log('tokenContract: ', tokenContract);
-                let tokenName = await tokenContract.methods
-                    .symbol()
-                    .call()
-                    .then(function(res) {
-                        return res;
-                    });
+                const tokenContract = new ethers.Contract(addAddress, erc20abi, provider);
+                console.log("tokenContract: ", tokenContract);
+                const tokenName = await tokenContract["symbol"]();
+                console.log("tokenName: ", tokenName);
                 const tokenList = {
-                    Address: addAddress,
+                    address: addAddress,
                     tokenName: tokenName,
+                    active: true
                 };
-                var userListRef = database.ref(addressDatabaseURL);
-                var newUserRef = userListRef.push();
+                const userListRef = database.ref(addressDatabaseURL);
+                const newUserRef = userListRef.push();
                 newUserRef.set(tokenList);
                 props.onReload();
             } catch (err) {
+                console.log(err);
                 alert('please check token address.');
                 addAddress = '';
             }
