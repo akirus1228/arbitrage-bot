@@ -4,11 +4,30 @@ import { InputGroup, FormControl, Button, Modal } from 'react-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
 import React, { useState } from 'react';
 
-import { removeToken, updateToken } from '../../store/reducers/app-slice';
+import { addToken, removeToken, updateToken } from '../../store/reducers/app-slice';
 
 const TokenList = () => {
     const dispatch = useDispatch();
     const appData = useSelector((state) => state.app);
+    const [address, setAddress] = useState('');
+    const [show, setShow] = useState(false);
+
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+    const handleAddress = e => {
+        setAddress(e.target.value);
+    };
+
+    const addTokenList = () => {
+        setShow(false);
+        if (address === '') {
+            alert('Please check Address');
+            return;
+        } else {
+            const checksumAddress = ethers.utils.getAddress(address);
+            dispatch(addToken(checksumAddress))
+        }
+    };
 
     const deleteTokenList = (id) => {
         dispatch(removeToken(id));
@@ -80,7 +99,9 @@ const TokenList = () => {
             <hr />
             <br />
             <br />
-            <Example />
+            <Button variant="primary" onClick={handleShow}>
+                Add Token
+            </Button>
             <br />
             <br />
             <MDBDataTableV5
@@ -93,39 +114,6 @@ const TokenList = () => {
             />
             <br />
             <br />
-        </div>
-    );
-}
-
-export default TokenList;
-
-function Example() {
-    const dispatch = useDispatch();
-    const [address, setAddress] = useState('');
-    const [show, setShow] = useState(false);
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
-
-    const addToken = async () => {
-        setShow(false);
-        if (address === '') {
-            alert('Please check Address');
-            return;
-        } else {
-            const checksumAddress = ethers.utils.getAddress(address);
-            dispatch(addToken(checksumAddress))
-        }
-    };
-
-    const handleAddress = e => {
-        setAddress(e.target.value);
-    };
-    return (
-        <>
-            <Button variant="primary" onClick={handleShow}>
-                Add Token
-            </Button>
-
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
                     <Modal.Title>Add Token Address</Modal.Title>
@@ -149,11 +137,13 @@ function Example() {
                     <Button variant="secondary" onClick={handleClose}>
                         Close
                     </Button>
-                    <Button variant="primary" onClick={addToken}>
+                    <Button variant="primary" onClick={addTokenList}>
                         Add token
                     </Button>
                 </Modal.Footer>
             </Modal>
-        </>
+        </div>
     );
 }
+
+export default TokenList;

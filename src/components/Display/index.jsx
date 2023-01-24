@@ -59,15 +59,18 @@ const Display = () => {
 
   const handleOK = () => {
     const updatedTokenLists = tokenLists.map((tokenList) => {
-      if (tokenList === selectedToken) {
+      if (tokenList === selectedToken && minAmount < maxAmount) {
         tokenList.minAmount = minAmount;
         tokenList.maxAmount = maxAmount;
       }
+      else {
+        alert('Maximum amount must be great than minimum amount!');
+      }
       return tokenList;
     });
-
     setTokenLists(updatedTokenLists)
     setShow(false);
+
   }
 
   const handleMaxAmount = e => {
@@ -81,15 +84,16 @@ const Display = () => {
   const showSettingAmountModel = (tokenAddress) => {
     setShow(true);
     const token = tokenLists.filter(
-      (tokenList) => tokenList.Address === tokenAddress,
+      (tokenList) => tokenList.address === tokenAddress,
     )[0];
     setToken(token);
   }
 
   const tokenSettingData = tokenLists.map((tokenList) => {
-    tokenList.min_amount = tokenList.minAmount;
-    tokenList.max_amount = tokenList.maxAmount;
-    tokenList.actions = (
+    const token  = {...tokenList};
+    token.min_amount = tokenList.minAmount;
+    token.max_amount = tokenList.maxAmount;
+    token.actions = (
       <div>
         <Button
           variant="outline-success"
@@ -101,7 +105,7 @@ const Display = () => {
         </Button>{" "}
       </div>
     );
-    return tokenList;
+    return token;
   });
 
   const dataPriceTable = {

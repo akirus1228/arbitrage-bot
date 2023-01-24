@@ -48,7 +48,8 @@ export const addToken = createAsyncThunk(
       active: true
     };
     await database.ref(addressDatabaseURL).push().set(newToken);
-    return await getAll();
+    const result = await getAll();
+    return result;
   }
 );
 
