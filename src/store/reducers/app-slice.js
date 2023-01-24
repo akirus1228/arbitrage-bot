@@ -56,9 +56,10 @@ export const updateToken = createAsyncThunk(
   "app/updateToken",
   async (uuid) => {
     const tokenRef = await database.ref(addressDatabaseURL + '/' + uuid);
-    tokenRef.set({active: !tokenRef.child('active').get().val()});
-    console.log("updateToken: ", tokenRef, tokenRef.val());
-    return await getAll();
+    const token = await tokenRef.get();
+    await tokenRef.update({active: !token.val().active});
+    const result = await getAll();
+    return result;
   }
 );
 
@@ -76,34 +77,44 @@ export const appSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(getAllTokens.pending, (state) => {
-      state.checkPermStatus = "pending";
+      state.loading = "pending";
     });
     builder.addCase(getAllTokens.fulfilled, (state, action) => {
-      state.checkPermStatus = "success";
+      state.loading = "success";
       state.tokens = action.payload;
     });
     builder.addCase(getAllTokens.rejected, (state) => {
-      state.checkPermStatus = "failed";
+      state.loading = "failed";
     });
     builder.addCase(addToken.pending, (state) => {
-      state.checkPermStatus = "pending";
+      state.loading = "pending";
     });
     builder.addCase(addToken.fulfilled, (state, action) => {
-      state.checkPermStatus = "success";
+      state.loading = "success";
       state.tokens = action.payload;
     });
     builder.addCase(addToken.rejected, (state) => {
-      state.checkPermStatus = "failed";
+      state.loading = "failed";
+    });
+    builder.addCase(updateToken.pending, (state) => {
+      state.loading = "pending";
+    });
+    builder.addCase(updateToken.fulfilled, (state, action) => {
+      state.loading = "success";
+      state.tokens = action.payload;
+    });
+    builder.addCase(updateToken.rejected, (state) => {
+      state.loading = "failed";
     });
     builder.addCase(removeToken.pending, (state) => {
-      state.checkPermStatus = "pending";
+      state.loading = "pending";
     });
     builder.addCase(removeToken.fulfilled, (state, action) => {
-      state.checkPermStatus = "success";
+      state.loading = "success";
       state.tokens = action.payload;
     });
     builder.addCase(removeToken.rejected, (state) => {
-      state.checkPermStatus = "failed";
+      state.loading = "failed";
     });
   },
 });
