@@ -11,11 +11,9 @@ import './App.css'
 
 const App = () => {
     const dispatch = useDispatch();
-
     useEffect(() => {
         dispatch(getAllTokens());
     }, [])
-
     return (
         <div>
             <TopNav />
