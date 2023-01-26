@@ -68,7 +68,7 @@ const Display = () => {
       }
       return tokenList;
     });
-    setTokenLists(updatedTokenLists)
+    setTokenLists(updatedTokenLists);
     setShow(false);
 
   }
