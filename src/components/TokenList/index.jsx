@@ -76,7 +76,6 @@ const TokenList = () => {
             {
                 label: 'Token Address',
                 field: 'address',
-                sort: 'asc',
                 width: 270
             },
             {
@@ -87,7 +86,6 @@ const TokenList = () => {
             {
                 label: 'Delete',
                 field: 'delete',
-                sort: 'asc',
                 width: 100
             }
         ],
