@@ -119,21 +119,14 @@ const Display = () => {
         field: "binance",
       },
       {
-        label: "Kucoin",
-        field: "kucoin",
+        label: "UniswapV2",
+        field: "uni_v2",
       },
       {
-        label: "PancakeSwap",
-        field: "pcs",
+        label: "UniSwapV3",
+        field: "uni_v3",
       },
-      {
-        label: "UniSwap",
-        field: "uni",
-      },
-      {
-        label: "Reward",
-        field: "reward",
-      },
+      
     ],
     rows: priceData,
   };
@@ -165,37 +158,31 @@ const Display = () => {
       {
         label: "TimeStamp",
         field: "timeStamp",
-        sort: "asc",
         width: 150,
       },
       {
         label: "Trade Token",
         field: "tradeToken",
-        sort: "asc",
         width: 270,
       },
       {
         label: "Trade Amount",
         field: "autoAmount",
-        sort: "asc",
         width: 200,
       },
       {
         label: "Buy Exchange",
         field: "firstDex",
-        sort: "asc",
         width: 100,
       },
       {
         label: "Sell Exchange",
         field: "secondDex",
-        sort: "asc",
         width: 100,
       },
       {
         label: "Trade Rate",
         field: "tradeRate",
-        sort: "asc",
         width: 100,
       },
     ],

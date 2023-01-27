@@ -12,7 +12,10 @@ const TokenList = () => {
     const [address, setAddress] = useState('');
     const [show, setShow] = useState(false);
 
-    const handleClose = () => setShow(false);
+    const handleClose = () => {
+        setShow(false);
+        setAddress('');
+    };
     const handleShow = () => setShow(true);
     const handleAddress = e => {
         setAddress(e.target.value);
@@ -27,6 +30,7 @@ const TokenList = () => {
             const checksumAddress = ethers.utils.getAddress(address);
             dispatch(addToken(checksumAddress))
         }
+        setAddress('');
     };
 
     const deleteTokenList = (id) => {
@@ -64,13 +68,11 @@ const TokenList = () => {
             {
                 label: 'No',
                 field: 'id',
-                sort: 'asc',
                 width: 150
             },
             {
                 label: 'Token Symbol',
                 field: 'tokenName',
-                sort: 'asc',
                 width: 200
             },
             {
@@ -109,6 +111,10 @@ const TokenList = () => {
                 pagesAmount={10}
                 data={data}
                 materialSearch
+                onSort={({column, direction})=> {
+                    if (column === 'active') {
+                        
+                }}}
             />
             <br />
             <br />
