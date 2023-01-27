@@ -5,7 +5,6 @@ import React, { useEffect } from 'react';
 import TopNav from './components/TopNav';
 import Display from './components/Display';
 import TokenList  from './components/TokenList';
-import Contact  from './components/Contact/index.jsx';
 import { getAllTokens } from './store/reducers/app-slice';
 import './App.css'
 
@@ -36,10 +35,6 @@ const App = () => {
                                     </svg>    Token Manage
                                 </Nav.Link> 
                             </Nav.Item>
-                            <Nav.Item>
-                                <Nav.Link eventKey="third">Contact
-                                </Nav.Link> 
-                            </Nav.Item>
                         </Nav>
                     </Col>
                     <Col xs="11">
@@ -49,9 +44,6 @@ const App = () => {
                             </Tab.Pane>
                             <Tab.Pane eventKey="second">
                                 <TokenList />
-                            </Tab.Pane>
-                            <Tab.Pane eventKey="third">
-                                <Contact />
                             </Tab.Pane>
                         </Tab.Content>
                     </Col>

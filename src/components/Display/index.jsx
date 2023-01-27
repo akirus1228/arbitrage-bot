@@ -10,6 +10,7 @@ import React, { useEffect, useState } from "react";
 const Display = () => {
   const appData = useSelector((state) => state.app);
   const [show, setShow] = useState(false);
+  const [isLogDialogFlog, setLogDialogFlog] = useState(false);
   const [selectedToken, setToken] = useState({});
   const [minAmount, setMinAmount] = useState(0);
   const [maxAmount, setMaxAmount] = useState(100);
@@ -42,6 +43,7 @@ const Display = () => {
   }
 
   const clearLog = () => {
+    setLogDialogFlog(false);
     console.log("clear log.");
   }
 
@@ -240,7 +242,7 @@ const Display = () => {
                   <Button
                     variant="primary"
                     id="button-addon2"
-                    onClick={clearLog}
+                    onClick={() => setLogDialogFlog(true)}
                   >
                     clear
                   </Button>
@@ -342,84 +344,22 @@ const Display = () => {
           </Card>
         </div>
       </div>
-      {/* <Modal show={this.state.modalShowState}>
-        <Modal.Header closeButton onClick={() => this.closeModal()}>
-          <Modal.Title>Auto-Excute</Modal.Title>
+      <Modal show={isLogDialogFlog}>
+        <Modal.Header closeButton onClick={() => setLogDialogFlog(false)}>
+          <Modal.Title>Clear Log</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <InputGroup className="mb-3">
-            <InputGroup.Text id="basic-addon3">Profit Rate</InputGroup.Text>
-            <FormControl
-              id="basic-url1"
-              aria-describedby="basic-addon3"
-              type="text"
-              defaultValue={this.state.autoProfit}
-              onChange={handleAutoProfit}
-              placeholder="Profit Limit, unit : %"
-            />
-            <InputGroup.Text id="basic-addon2">%</InputGroup.Text>
-          </InputGroup>
-
-          <InputGroup className="mb-3">
-            <InputGroup.Text id="basic-addon3">Interval</InputGroup.Text>
-            <FormControl
-              id="basic-url"
-              aria-describedby="basic-addon3"
-              type="text"
-              defaultValue={this.state.autoTime}
-              onChange={handleAutoTimepitch}
-              placeholder="Interval  Unit : ms"
-            />
-            <InputGroup.Text id="basic-addon2">ms</InputGroup.Text>
-          </InputGroup>
-
-          <InputGroup className="mb-3">
-            <InputGroup.Text id="basic-addon3">Slippage</InputGroup.Text>
-            <FormControl
-              id="basic-url"
-              aria-describedby="basic-addon3"
-              type="text"
-              defaultValue={this.state.autoSlippage}
-              onChange={handleAutoSlippage}
-              placeholder="Slippage Unit : %"
-            />
-            <InputGroup.Text id="basic-addon2">%</InputGroup.Text>
-          </InputGroup>
-
-          <InputGroup className="mb-3">
-            <InputGroup.Text id="basic-addon3">Gas value</InputGroup.Text>
-            <FormControl
-              id="basic-url"
-              aria-describedby="basic-addon3"
-              type="text"
-              defaultValue={this.state.autoGasValue}
-              onChange={handleAutoGasValue}
-              placeholder="Gas Value Unit : gwei"
-            />
-            <InputGroup.Text id="basic-addon2">Gwei</InputGroup.Text>
-          </InputGroup>
-
-          <InputGroup className="mb-3">
-            <InputGroup.Text id="basic-addon3">Gas Limit</InputGroup.Text>
-            <FormControl
-              id="basic-url"
-              aria-describedby="basic-addon3"
-              type="text"
-              defaultValue={this.state.autoGasLimit}
-              onChange={handleAutoGasLimit}
-              placeholder="Gas Limit"
-            />
-          </InputGroup>
+          <p>Are you sure?</p>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => this.closeModal()}>
-            Close
+          <Button variant="secondary" onClick={() => setLogDialogFlog(false)}>
+            No
           </Button>
-          <Button variant="primary" onClick={() => this.autoExcuteStart()}>
-            Start
+          <Button variant="primary" onClick={() => clearLog()}>
+            Yes
           </Button>
         </Modal.Footer>
-      </Modal> */}
+      </Modal>
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Setting Token Amounts</Modal.Title>
