@@ -76,8 +76,6 @@ const Display = () => {
     });
     setTokenLists(updatedTokenLists);
     setShow(false);
-    if (isError)
-      console.log("min", minAmount, "max", maxAmount);
   };
 
   const handleMaxAmount = (value) => {
