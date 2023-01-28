@@ -61,29 +61,16 @@ const Display = () => {
   };
 
   const handleOK =() => {
-    let isError = false;
     const updatedTokenLists = tokenLists.map((tokenList) => {
       if (tokenList === selectedToken) {
-        if (minAmount < maxAmount) {
+        if (Number(minAmount) < Number(maxAmount)) {
           tokenList.minAmount = Number(minAmount);
           tokenList.maxAmount = Number(maxAmount);
-          isError = false;
-        } else {
-          isError = true;
-        }
-      }
+      }}
       return tokenList;
     });
     setTokenLists(updatedTokenLists);
     setShow(false);
-  };
-
-  const handleMaxAmount = (value) => {
-    setMaxAmount(value);
-  };
-
-  const handleMinAmount = (value) => {
-    setMinAmount(value);
   };
 
   const showSettingAmountModel = (tokenAddress) => {
@@ -377,7 +364,7 @@ const Display = () => {
                     }}
                     pattern="^[0-9]*[.,].?[0-9]*"
                     onChange={(e) =>
-                      handleMinAmount(e.target.value.replace(/,/g, "."))
+                      setMinAmount(e.target.value)
                     }
                     placeholder="Loan Amount  X ETH X is integer"
                   />
@@ -402,7 +389,7 @@ const Display = () => {
                     }}
                     pattern="^[0-9]*[.,].?[0-9]*"
                     onChange={(e) =>
-                      handleMaxAmount(e.target.value.replace(/,/g, "."))
+                      setMaxAmount(e.target.value)
                     }
                     placeholder="Loan Amount  X ETH X is integer"
                   />
