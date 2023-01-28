@@ -3,9 +3,8 @@ import { useSelector } from "react-redux";
 import { FiMonitor, FiUserPlus } from "react-icons/fi";
 import { BsClockHistory } from "react-icons/bs";
 import { GiReceiveMoney } from "react-icons/gi";
-import { Button, InputGroup, FormControl, Modal, Card } from "react-bootstrap";
+import { Button, InputGroup, Form, Modal, Card } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
-
 
 const Display = () => {
   const appData = useSelector((state) => state.app);
@@ -23,11 +22,13 @@ const Display = () => {
 
   useEffect(() => {
     if (appData.loading === "success") {
-      const tokens = appData.tokens.filter((token) => token.active).map((token) => ({
-        ...token,
-        minAmount: 0,
-        maxAmount: 100
-      }))
+      const tokens = appData.tokens
+        .filter((token) => token.active)
+        .map((token) => ({
+          ...token,
+          minAmount: 0,
+          maxAmount: 100,
+        }));
       setTokenLists(tokens);
     }
   }, [appData.tokens]);
@@ -35,53 +36,57 @@ const Display = () => {
   const start = () => {
     console.log("bot starting...");
     setExecutionState(true);
-  }
+  };
 
   const stop = () => {
     console.log("bot stopping...");
     setExecutionState(false);
-  }
+  };
 
   const clearLog = () => {
     setLogDialogFlog(false);
     console.log("clear log.");
-  }
+  };
 
   const handleOwnerAddress = (e) => {
     setOwnerAddress(e.target.value);
-  }
+  };
 
-  const handleOwnerPrivateKey = e => {
+  const handleOwnerPrivateKey = (e) => {
     setOwnerPrivateKey(e.target.value);
-  }
+  };
 
   const handleClose = () => {
     setShow(false);
-  }
+  };
 
-  const handleOK = () => {
+  const handleOK =() => {
+    let isError = false;
     const updatedTokenLists = tokenLists.map((tokenList) => {
-      if (tokenList === selectedToken && minAmount < maxAmount) {
-        tokenList.minAmount = minAmount;
-        tokenList.maxAmount = maxAmount;
-      }
-      else {
-        alert('Maximum amount must be great than minimum amount!');
+      if (tokenList === selectedToken) {
+        if (minAmount < maxAmount) {
+          tokenList.minAmount = Number(minAmount);
+          tokenList.maxAmount = Number(maxAmount);
+          isError = false;
+        } else {
+          isError = true;
+        }
       }
       return tokenList;
     });
     setTokenLists(updatedTokenLists);
     setShow(false);
+    if (isError)
+      console.log("min", minAmount, "max", maxAmount);
+  };
 
-  }
+  const handleMaxAmount = (value) => {
+    setMaxAmount(value);
+  };
 
-  const handleMaxAmount = e => {
-    setMaxAmount(e.target.value);
-  }
-
-  const handleMinAmount = e => {
-    setMinAmount(e.target.value);
-  }
+  const handleMinAmount = (value) => {
+    setMinAmount(value);
+  };
 
   const showSettingAmountModel = (tokenAddress) => {
     setShow(true);
@@ -89,10 +94,10 @@ const Display = () => {
       (tokenList) => tokenList.address === tokenAddress,
     )[0];
     setToken(token);
-  }
+  };
 
   const tokenSettingData = tokenLists.map((tokenList) => {
-    const token  = {...tokenList};
+    const token = { ...tokenList };
     token.min_amount = tokenList.minAmount;
     token.max_amount = tokenList.maxAmount;
     token.actions = (
@@ -128,7 +133,6 @@ const Display = () => {
         label: "UniSwapV3",
         field: "uni_v3",
       },
-      
     ],
     rows: priceData,
   };
@@ -294,15 +298,14 @@ const Display = () => {
                 <div className="col-1"></div>
                 <div className="col-10">
                   <InputGroup className="mb-3">
-                    <FormControl
+                    <Form.Control
                       placeholder="Wallet address"
                       aria-label="Recipient's username"
                       aria-describedby="basic-addon2"
                       defaultValue={ownerAddress}
                       onChange={handleOwnerAddress}
                     />
-
-                    <FormControl
+                    <Form.Control
                       placeholder="Private Key"
                       aria-label="Recipient's username"
                       aria-describedby="basic-addon2"
@@ -320,17 +323,9 @@ const Display = () => {
                 <div className="col-10">
                   <InputGroup className="mb-3">
                     <Button
-                      variant={
-                        executionState
-                          ? "danger"
-                          : "success"
-                      }
+                      variant={executionState ? "danger" : "success"}
                       id="button-addon2"
-                      onClick={
-                        executionState
-                          ? () => stop()
-                          : () => start()
-                      }
+                      onClick={executionState ? () => stop() : () => start()}
                       style={{ width: "100%" }}
                     >
                       {executionState ? "Stop" : "Start"}
@@ -372,12 +367,20 @@ const Display = () => {
                   <InputGroup.Text id="basic-addon3">
                     Min amount
                   </InputGroup.Text>
-                  <FormControl
+                  <Form.Control
                     id="basic-url"
                     aria-describedby="basic-addon3"
-                    type="text"
                     defaultValue={selectedToken.minAmount}
-                    onChange={handleMinAmount}
+                    type="number"
+                    onKeyPress={(event) => {
+                      if (!/[0-9]|./.test(event.key)) {
+                        event.preventDefault();
+                      }
+                    }}
+                    pattern="^[0-9]*[.,].?[0-9]*"
+                    onChange={(e) =>
+                      handleMinAmount(e.target.value.replace(/,/g, "."))
+                    }
                     placeholder="Loan Amount  X ETH X is integer"
                   />
                 </InputGroup>
@@ -389,12 +392,20 @@ const Display = () => {
                   <InputGroup.Text id="basic-addon3">
                     Max amount
                   </InputGroup.Text>
-                  <FormControl
+                  <Form.Control
                     id="basic-url"
                     aria-describedby="basic-addon3"
-                    type="text"
                     defaultValue={selectedToken.maxAmount}
-                    onChange={handleMaxAmount}
+                    type="number"
+                    onKeyPress={(event) => {
+                      if (!/[0-9]|./.test(event.key)) {
+                        event.preventDefault();
+                      }
+                    }}
+                    pattern="^[0-9]*[.,].?[0-9]*"
+                    onChange={(e) =>
+                      handleMaxAmount(e.target.value.replace(/,/g, "."))
+                    }
                     placeholder="Loan Amount  X ETH X is integer"
                   />
                 </InputGroup>
@@ -413,6 +424,6 @@ const Display = () => {
       </Modal>
     </div>
   );
-}
+};
 
 export default Display;
