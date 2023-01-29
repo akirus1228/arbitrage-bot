@@ -38,26 +38,21 @@ export const getAllTokens = createAsyncThunk(
 export const addToken = createAsyncThunk(
   "app/addToken",
   async (address) => {
-    await database.ref(addressDatabaseURL).orderByChild('address').equalTo(address).once('value', async snapshot => {
-      if (snapshot.exists()){
-        const token = snapshot.val();
-        console.log("This token already exists!", token['address']);
-      }
-      else {
-        const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
-        const tokenContract = new ethers.Contract(address, erc20abi, provider);
-        const tokenName = await tokenContract["symbol"]();
+    const collections = await database.ref(addressDatabaseURL).get();
+    const addresses = Object.values(collections.val()).map(collection => collection.address);
+    if (!addresses.includes(address)) {
+      const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
+      const tokenContract = new ethers.Contract(address, erc20abi, provider);
+      const tokenName = await tokenContract["symbol"]();
 
-        const newToken = {
-          address,
-          tokenName: tokenName,
-          active: true
-        };
-        await database.ref(addressDatabaseURL).push().set(newToken);
-      }
-    });
-    const result = await getAll();
-    return result;
+      const newToken = {
+        address,
+        tokenName: tokenName,
+        active: true
+      };
+      await database.ref(addressDatabaseURL).push().set(newToken);
+    }
+    return await getAll();
   }
 );
 
