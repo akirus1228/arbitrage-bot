@@ -19,6 +19,7 @@ const Display = () => {
   const [executionState, setExecutionState] = useState(false);
   const [ownerAddress, setOwnerAddress] = useState("");
   const [ownerPrivateKey, setOwnerPrivateKey] = useState("");
+  const inputRegex = RegExp(`^\\d*(?:\\\\[.])?\\d*$`);
 
   useEffect(() => {
     if (appData.loading === "success") {
@@ -60,17 +61,32 @@ const Display = () => {
     setShow(false);
   };
 
-  const handleOK =() => {
+  const handleOK = () => {
     const updatedTokenLists = tokenLists.map((tokenList) => {
       if (tokenList === selectedToken) {
         if (Number(minAmount) < Number(maxAmount)) {
           tokenList.minAmount = Number(minAmount);
           tokenList.maxAmount = Number(maxAmount);
-      }}
+        }
+      }
       return tokenList;
     });
     setTokenLists(updatedTokenLists);
     setShow(false);
+  };
+
+  const handleMaxAmount = (value) => {
+    if (inputRegex.test(value)) {
+      console.log(value);
+      setMaxAmount(value);
+    }
+  };
+
+  const handleMinAmount = (value) => {
+    if (inputRegex.test(value)) {
+      console.log(value);
+      setMaxAmount(value);
+    }
   };
 
   const showSettingAmountModel = (tokenAddress) => {
@@ -357,15 +373,8 @@ const Display = () => {
                     aria-describedby="basic-addon3"
                     defaultValue={selectedToken.minAmount}
                     type="number"
-                    onKeyPress={(event) => {
-                      if (!/[0-9]|./.test(event.key)) {
-                        event.preventDefault();
-                      }
-                    }}
                     pattern="^[0-9]*[.,].?[0-9]*"
-                    onChange={(e) =>
-                      setMinAmount(e.target.value)
-                    }
+                    onChange={(e) => handleMinAmount(e.target.value)}
                     placeholder="Loan Amount  X ETH X is integer"
                   />
                 </InputGroup>
@@ -382,15 +391,10 @@ const Display = () => {
                     aria-describedby="basic-addon3"
                     defaultValue={selectedToken.maxAmount}
                     type="number"
-                    onKeyPress={(event) => {
-                      if (!/[0-9]|./.test(event.key)) {
-                        event.preventDefault();
-                      }
-                    }}
                     pattern="^[0-9]*[.,].?[0-9]*"
-                    onChange={(e) =>
-                      setMaxAmount(e.target.value)
-                    }
+                    onChange={(e) => {
+                      handleMaxAmount(e.target.value);
+                    }}
                     placeholder="Loan Amount  X ETH X is integer"
                   />
                 </InputGroup>
@@ -410,5 +414,4 @@ const Display = () => {
     </div>
   );
 };
-
 export default Display;
