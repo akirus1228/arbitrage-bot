@@ -85,7 +85,7 @@ const Display = () => {
   const handleMinAmount = (value) => {
     if (inputRegex.test(value)) {
       console.log(value);
-      setMaxAmount(value);
+      setMinAmount(value);
     }
   };
 
