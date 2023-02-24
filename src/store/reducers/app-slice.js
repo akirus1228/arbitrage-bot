@@ -15,7 +15,7 @@ async function getAll() {
         id: index + 1,
         key,
         address: data[key].address,
-        tokenName: data[key].tokenName,
+        symbol: data[key].symbol,
         active: data[key].active,
       })
     });
@@ -39,19 +39,45 @@ export const addToken = createAsyncThunk(
   "app/addToken",
   async (address) => {
     const collections = await database.ref(addressDatabaseURL).get();
-    const addresses = Object.values(collections.val()).map(collection => collection.address);
-    if (!addresses.includes(address)) {
+    if (collections.val() === null ) {
       const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
       const tokenContract = new ethers.Contract(address, erc20abi, provider);
-      const tokenName = await tokenContract["symbol"]();
+      const symbol = await tokenContract["symbol"]();
+      console.log('symbol: ', symbol);
 
       const newToken = {
         address,
-        tokenName: tokenName,
-        active: true
+        symbol,
+        active: true,
+        amount: {
+          min: 0,
+          max: 100
+        }
       };
       await database.ref(addressDatabaseURL).push().set(newToken);
+    } else {
+      const addresses = Object.values(collections.val()).map(collection => collection.address);
+      console.log('c')
+      if (!addresses.includes(address)) {
+        console.log('aa');
+        const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
+        const tokenContract = new ethers.Contract(address, erc20abi, provider);
+        const symbol = await tokenContract["symbol"]();
+        console.log('symbol: ', symbol);
+
+        const newToken = {
+          address,
+          symbol,
+          active: true,
+          amount: {
+            min: 0,
+            max: 100
+          }
+        };
+        await database.ref(addressDatabaseURL).push().set(newToken);
+      }
     }
+    console.log('bb');
     return await getAll();
   }
 );

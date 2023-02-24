@@ -77,14 +77,12 @@ const Display = () => {
 
   const handleMaxAmount = (value) => {
     if (inputRegex.test(value)) {
-      console.log(value);
       setMaxAmount(value);
     }
   };
 
   const handleMinAmount = (value) => {
     if (inputRegex.test(value)) {
-      console.log(value);
       setMinAmount(value);
     }
   };
@@ -120,7 +118,7 @@ const Display = () => {
     columns: [
       {
         label: "Token",
-        field: "tokenName",
+        field: "symbol",
       },
       {
         label: "Binance",
@@ -142,7 +140,7 @@ const Display = () => {
     columns: [
       {
         label: "Token",
-        field: "tokenName",
+        field: "symbol",
       },
       {
         label: "Min Amount",

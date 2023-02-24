@@ -78,7 +78,7 @@ const TokenList = () => {
       },
       {
         label: "Token Symbol",
-        field: "tokenName",
+        field: "symbol",
         width: 200,
       },
       {
