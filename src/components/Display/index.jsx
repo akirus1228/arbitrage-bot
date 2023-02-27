@@ -1,12 +1,15 @@
 import { MDBDataTableV5 } from "mdbreact";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { FiMonitor, FiUserPlus } from "react-icons/fi";
 import { BsClockHistory } from "react-icons/bs";
 import { GiReceiveMoney } from "react-icons/gi";
 import { Button, InputGroup, Form, Modal, Card } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
 
+import { updateToken } from "../../store/reducers/app-slice";
+
 const Display = () => {
+  const dispatch = useDispatch();
   const appData = useSelector((state) => state.app);
   const [show, setShow] = useState(false);
   const [isLogDialogFlog, setLogDialogFlog] = useState(false);
@@ -24,12 +27,8 @@ const Display = () => {
   useEffect(() => {
     if (appData.loading === "success") {
       const tokens = appData.tokens
-        .filter((token) => token.active)
-        .map((token) => ({
-          ...token,
-          minAmount: 0,
-          maxAmount: 100,
-        }));
+        .filter((token) => token.active);
+      console.log(tokens);
       setTokenLists(tokens);
     }
   }, [appData.tokens]);
@@ -62,16 +61,19 @@ const Display = () => {
   };
 
   const handleOK = () => {
-    const updatedTokenLists = tokenLists.map((tokenList) => {
-      if (tokenList === selectedToken) {
-        if (Number(minAmount) < Number(maxAmount)) {
-          tokenList.minAmount = Number(minAmount);
-          tokenList.maxAmount = Number(maxAmount);
-        }
-      }
-      return tokenList;
-    });
-    setTokenLists(updatedTokenLists);
+    if (Number(minAmount) < Number(maxAmount)) {
+      dispatch(updateToken({ ...selectedToken, minAmount: Number(minAmount), maxAmount: Number(maxAmount) }));
+      setTokenLists((tokenList) => {
+        tokenList.map((token) => {
+          if (token === selectedToken) {
+            return { ...token, minAmount: Number(minAmount), maxAmount: Number(maxAmount) }
+          } else {
+            return token;
+          }
+        });
+        return tokenList;
+      });
+    }
     setShow(false);
   };
 

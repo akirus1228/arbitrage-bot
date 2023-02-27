@@ -20,7 +20,9 @@ const TokenList = () => {
     setShow(false);
     setAddress("");
   };
+
   const handleShow = () => setShow(true);
+
   const handleAddress = (e) => {
     setAddress(e.target.value);
   };
@@ -31,8 +33,12 @@ const TokenList = () => {
       alert("Please check Address");
       return;
     } else {
-      const checksumAddress = ethers.utils.getAddress(address);
-      dispatch(addToken(checksumAddress));
+      try {
+        const checksumAddress = ethers.utils.getAddress(address);
+        dispatch(addToken(checksumAddress));
+      } catch (e) {
+        alert("Invalid token address");
+      }
     }
     setAddress("");
   };
@@ -41,8 +47,9 @@ const TokenList = () => {
     dispatch(removeToken(id));
   };
 
-  const setTokenActive = (id) => {
-    dispatch(updateToken(id));
+  const setTokenActive = (crypto) => {
+    console.log(crypto)
+    dispatch(updateToken({ ...crypto, active: !crypto.active }));
   };
 
   const rows = appData.tokens.map((crypto) => {
@@ -53,9 +60,9 @@ const TokenList = () => {
           variant={`${crypto.active ? "primary" : "danger"}`}
           size="sm"
           value={crypto.active ? "Active" : "Disable"}
-          onClick={() => setTokenActive(crypto.key)}
+          onClick={() => setTokenActive(crypto)}
         >
-          {crypto.active ? "Active" : "Disable"}
+          {!crypto.active ? "Active" : "Disable"}
         </Button>
         <Button
           variant="outline-danger"
@@ -66,9 +73,10 @@ const TokenList = () => {
         </Button>
       </div>
     );
-    row.active = row.active ? "Active" : "Disable";
+    row.active = row.active ? "Actived" : "Disabled";
     return row;
   });
+
   const data = {
     columns: [
       {
@@ -87,6 +95,11 @@ const TokenList = () => {
         width: 270,
       },
       {
+        label: "Decimals",
+        field: "decimals",
+        width: 50,
+      },
+      {
         label: "Active",
         field: "active",
         width: 270,
@@ -99,6 +112,7 @@ const TokenList = () => {
     ],
     rows: rows,
   };
+
   return (
     <div>
       <h2>Token List</h2>

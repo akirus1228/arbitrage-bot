@@ -14,9 +14,7 @@ async function getAll() {
       tokens.push({
         id: index + 1,
         key,
-        address: data[key].address,
-        symbol: data[key].symbol,
-        active: data[key].active,
+        ...data[key]
       })
     });
   };
@@ -39,55 +37,49 @@ export const addToken = createAsyncThunk(
   "app/addToken",
   async (address) => {
     const collections = await database.ref(addressDatabaseURL).get();
-    if (collections.val() === null ) {
+    if (collections.val() === null) {
       const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
       const tokenContract = new ethers.Contract(address, erc20abi, provider);
       const symbol = await tokenContract["symbol"]();
-      console.log('symbol: ', symbol);
-
+      const decimals = await tokenContract["decimals"]();
       const newToken = {
         address,
         symbol,
+        decimals,
         active: true,
-        amount: {
-          min: 0,
-          max: 100
-        }
+        minAmount: 0,
+        maxAmount: 0,
       };
       await database.ref(addressDatabaseURL).push().set(newToken);
     } else {
       const addresses = Object.values(collections.val()).map(collection => collection.address);
-      console.log('c')
       if (!addresses.includes(address)) {
-        console.log('aa');
         const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
         const tokenContract = new ethers.Contract(address, erc20abi, provider);
         const symbol = await tokenContract["symbol"]();
-        console.log('symbol: ', symbol);
+        const decimals = await tokenContract["decimals"]();
 
         const newToken = {
           address,
           symbol,
+          decimals,
           active: true,
-          amount: {
-            min: 0,
-            max: 100
-          }
+          minAmount: 0,
+          maxAmount: 0,
         };
         await database.ref(addressDatabaseURL).push().set(newToken);
       }
     }
-    console.log('bb');
     return await getAll();
   }
 );
 
 export const updateToken = createAsyncThunk(
   "app/updateToken",
-  async (uuid) => {
-    const tokenRef = await database.ref(addressDatabaseURL + '/' + uuid);
+  async (crypto) => {
+    const tokenRef = database.ref(addressDatabaseURL + '/' + crypto.key);
     const token = await tokenRef.get();
-    await tokenRef.update({active: !token.val().active});
+    await tokenRef.update({ ...token.val(), ...crypto });
     const result = await getAll();
     return result;
   }

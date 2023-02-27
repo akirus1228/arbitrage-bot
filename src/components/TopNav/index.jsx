@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Navbar } from "react-bootstrap";
-import { MDBIcon } from "mdbreact";
+
 class TopNav extends Component {
   constructor(props) {
     super(props);
