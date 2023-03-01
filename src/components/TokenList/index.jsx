@@ -10,7 +10,7 @@ import {
   updateToken,
 } from "../../store/reducers/app-slice";
 
-const TokenList = () => {
+const TokenList = ({ socket }) => {
   const dispatch = useDispatch();
   const appData = useSelector((state) => state.app);
   const [address, setAddress] = useState("");
@@ -48,7 +48,6 @@ const TokenList = () => {
   };
 
   const setTokenActive = (crypto) => {
-    console.log(crypto)
     dispatch(updateToken({ ...crypto, active: !crypto.active }));
   };
 

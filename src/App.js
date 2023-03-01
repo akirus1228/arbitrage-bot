@@ -1,6 +1,7 @@
 import { useDispatch } from 'react-redux';
 import { Tab, Col, Row, Nav } from 'react-bootstrap';
 import React, { useEffect } from 'react';
+import io from "socket.io-client";
 
 import TopNav from './components/TopNav';
 import Display from './components/Display';
@@ -8,10 +9,13 @@ import TokenList from './components/TokenList';
 import { getAllTokens } from './store/reducers/app-slice';
 import './App.css'
 
+const socket = io(process.env.REACT_APP_SOCKET_SERVER);
+
 const App = () => {
     const dispatch = useDispatch();
 
     useEffect(() => {
+        socket.emit("message");
         dispatch(getAllTokens());
     }, []);
 
@@ -40,10 +44,10 @@ const App = () => {
                     <Col xs="11">
                         <Tab.Content>
                             <Tab.Pane eventKey="first">
-                                <Display />
+                                <Display socket={socket} />
                             </Tab.Pane>
                             <Tab.Pane eventKey="second">
-                                <TokenList />
+                                <TokenList socket={socket} />
                             </Tab.Pane>
                         </Tab.Content>
                     </Col>

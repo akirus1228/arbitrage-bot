@@ -7,8 +7,9 @@ import { Button, InputGroup, Form, Modal, Card } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
 
 import { updateToken } from "../../store/reducers/app-slice";
+import { providers } from "ethers";
 
-const Display = () => {
+const Display = ({ socket }) => {
   const dispatch = useDispatch();
   const appData = useSelector((state) => state.app);
   const [show, setShow] = useState(false);
@@ -17,7 +18,7 @@ const Display = () => {
   const [minAmount, setMinAmount] = useState(0);
   const [maxAmount, setMaxAmount] = useState(100);
   const [tokenLists, setTokenLists] = useState([]);
-  const [priceData, setPriceData] = useState();
+  const [priceData, setPriceData] = useState([]);
   const [logData, setLogData] = useState();
   const [executionState, setExecutionState] = useState(false);
   const [ownerAddress, setOwnerAddress] = useState("");
@@ -28,24 +29,22 @@ const Display = () => {
     if (appData.loading === "success") {
       const tokens = appData.tokens
         .filter((token) => token.active);
-      console.log(tokens);
       setTokenLists(tokens);
     }
   }, [appData.tokens]);
 
   const start = () => {
-    console.log("bot starting...");
+    socket.emit("start");
     setExecutionState(true);
   };
 
   const stop = () => {
-    console.log("bot stopping...");
+    socket.emit("stop");
     setExecutionState(false);
   };
 
   const clearLog = () => {
     setLogDialogFlog(false);
-    console.log("clear log.");
   };
 
   const handleOwnerAddress = (e) => {
@@ -123,6 +122,10 @@ const Display = () => {
         field: "symbol",
       },
       {
+        label: "Amount",
+        field: "amount",
+      },
+      {
         label: "Binance",
         field: "binance",
       },
@@ -133,6 +136,10 @@ const Display = () => {
       {
         label: "UniSwapV3",
         field: "uni_v3",
+      },
+      {
+        label: "Last Modified",
+        field: "modified",
       },
     ],
     rows: priceData,
@@ -196,6 +203,30 @@ const Display = () => {
     rows: logData,
   };
 
+  const receivePriceSignal = (data) => {
+
+    if (priceData.length > 0 && priceData.find((price) => price.symbol === data.symbol)) {
+      setPriceData((prev) => {
+        return prev.map((price) => {
+          if (price.symbol === data.symbol) {
+            return { ...data };
+          } else {
+            return { ...price };
+          }
+        })
+      });
+    } else {
+      setPriceData((prev) => [...prev, data]);
+    }
+  }
+
+  useEffect(() => {
+    socket.on("price-signal", receivePriceSignal);
+    return () => {
+      socket.off("price-signal");
+    }
+  })
+
   return (
     <div>
       <div className="row">
@@ -217,8 +248,7 @@ const Display = () => {
               <MDBDataTableV5
                 hover
                 entriesOptions={[10, 20, 50, 100, 200, 500, 1000]}
-                entries={50}
-                pagesAmount={10}
+                paging={false}
                 data={dataPriceTable}
                 materialSearch
               />
