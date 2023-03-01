@@ -219,11 +219,17 @@ const Display = ({ socket }) => {
       setPriceData((prev) => [...prev, data]);
     }
   }
+  const receiveBotStatusSignal = (data) => {
+    console.log(data)
+    setExecutionState(data.status)
+  }
 
   useEffect(() => {
+    socket.on("bot-status", receiveBotStatusSignal);
     socket.on("price-signal", receivePriceSignal);
     return () => {
       socket.off("price-signal");
+      socket.off("bot-status");
     }
   })
 
