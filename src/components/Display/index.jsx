@@ -89,6 +89,10 @@ const Display = ({ socket }) => {
   };
 
   const showSettingAmountModel = (tokenAddress) => {
+    if (executionState) {
+      alert(`Bot is running with current setting. Please stop it first.`);
+      return;
+    }
     setShow(true);
     const token = tokenLists.filter(
       (tokenList) => tokenList.address === tokenAddress,
@@ -123,19 +127,36 @@ const Display = ({ socket }) => {
       },
       {
         label: "Amount",
+        width: 40,
         field: "amount",
+      },
+      {
+        label: "",
+        field: "direction",
       },
       {
         label: "Binance",
         field: "binance",
       },
       {
+        label: "Fee",
+        field: "binanceSwapFee",
+      },
+      {
         label: "UniswapV2",
-        field: "uni_v2",
+        field: "uniV2",
       },
       {
         label: "UniSwapV3",
-        field: "uni_v3",
+        field: "uniV3",
+      },
+      {
+        label: "Fee",
+        field: "uniV3Fee",
+      },
+      {
+        label: "ETA Profit",
+        field: "profit",
       },
       {
         label: "Last Modified",
@@ -204,23 +225,60 @@ const Display = ({ socket }) => {
   };
 
   const receivePriceSignal = (data) => {
-
     if (priceData.length > 0 && priceData.find((price) => price.symbol === data.symbol)) {
       setPriceData((prev) => {
         return prev.map((price) => {
           if (price.symbol === data.symbol) {
-            return { ...data };
+            return {
+              symbol: data.symbol,
+              amount: data.amount,
+              modified: data.modified,
+              direction: price.direction,
+              binance: data[price.direction].binance,
+              binanceSwapFee: `${data[price.direction].binanceSwapFee.amount} ${data[price.direction].binanceSwapFee.currency.symbol}`,
+              uniV2: data[price.direction].uniV2,
+              uniV3: data[price.direction].uniV3,
+              uniV3Fee: `${data[price.direction].uniV3Fee} USD`,
+              profit: data[price.direction].etaProfit,
+            }
           } else {
             return { ...price };
           }
         })
       });
     } else {
-      setPriceData((prev) => [...prev, data]);
+      const buy = {
+        symbol: data.symbol,
+        amount: data.amount,
+        modified: data.modified,
+        binance: data.buy.binance,
+        binanceSwapFee: `${data.buy.binanceSwapFee.amount} ${data.buy.binanceSwapFee.currency.symbol}`,
+        uniV2: data.buy.uniV2,
+        uniV3: data.buy.uniV3,
+        uniV3Fee: `${data.buy.uniV3Fee} USD`,
+        profit: data.buy.etaProfit,
+        direction: 'buy'
+      };
+      const sell = {
+        symbol: data.symbol,
+        amount: data.amount,
+        modified: data.modified,
+        binance: data.sell.binance,
+        binanceSwapFee: `${data.sell.binanceSwapFee.amount} ${data.sell.binanceSwapFee.currency.symbol}`,
+        uniV2: data.sell.uniV2,
+        uniV3: data.sell.uniV3,
+        uniV3Fee: `${data.sell.uniV3Fee} USD`,
+        profit: data.sell.etaProfit,
+        direction: 'sell'
+      };
+      setPriceData((prev) => [...prev, buy, sell]);
     }
   }
+
+  useEffect(() => {
+    console.log(priceData)
+  }, [priceData])
   const receiveBotStatusSignal = (data) => {
-    console.log(data)
     setExecutionState(data.status)
   }
 
@@ -236,7 +294,7 @@ const Display = ({ socket }) => {
   return (
     <div>
       <div className="row">
-        <div className="col-7">
+        <div className="col-9">
           <Card
             bg="light"
             style={{ height: "35rem", overflow: "scroll" }}
@@ -252,6 +310,7 @@ const Display = ({ socket }) => {
                 <hr />
               </Card.Title>
               <MDBDataTableV5
+                autoWidth={true}
                 hover
                 entriesOptions={[10, 20, 50, 100, 200, 500, 1000]}
                 paging={false}
@@ -301,7 +360,7 @@ const Display = ({ socket }) => {
             </Card.Body>
           </Card>
         </div>
-        <div className="col-5">
+        <div className="col-3">
           <Card
             bg="light"
             style={{ height: "67rem", overflow: "scroll" }}
