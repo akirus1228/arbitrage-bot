@@ -1,6 +1,7 @@
 export const walletAddress = ""
 export const walletPrivate = ""
 export const addressDatabaseURL  = "MainTokenAddress"
+export const historyDatabaseURL  = "TradeHistory"
 export const logDatabaseURL = "log"
 export const RPC_URL="https://mainnet.infura.io/v3/542f83ff23084a129ef631bb5fe102f1";
 export const uniSwap = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"

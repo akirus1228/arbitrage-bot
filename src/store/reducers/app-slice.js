@@ -3,11 +3,12 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 import { database } from '../../config/firebase';
 import { erc20abi } from '../../utils/abis/erc20ABI';
-import { addressDatabaseURL, RPC_URL } from '../../utils/basic';
+import { addressDatabaseURL, historyDatabaseURL, RPC_URL } from '../../utils/basic';
 
 async function getAll() {
   let tokens = [];
   const result = await database.ref(addressDatabaseURL + '/').get();
+  
   if (result.exists) {
     const data = result.val();
     Object.keys(data).forEach((key, index) => {
@@ -32,6 +33,25 @@ export const getAllTokens = createAsyncThunk(
     return await getAll();
   }
 );
+
+export const getAllTradeHistories = createAsyncThunk("app/getAllTradeHistories", async ()=> {
+
+  let histories = [];
+  const dbRef = database.ref(historyDatabaseURL + '/');
+  const result = await dbRef.get();
+  if (result.exists) {
+    const data = result.val();
+    Object.keys(data).forEach((key, index) => {
+      histories.push({
+        id: index + 1,
+        key,
+        ...data[key]
+      })
+    });
+  };
+ 
+  return histories;
+})
 
 export const addToken = createAsyncThunk(
   "app/addToken",
@@ -106,6 +126,16 @@ export const appSlice = createSlice({
       state.tokens = action.payload;
     });
     builder.addCase(getAllTokens.rejected, (state) => {
+      state.loading = "failed";
+    });
+    builder.addCase(getAllTradeHistories.pending, (state) => {
+      state.loading = "pending";
+    });
+    builder.addCase(getAllTradeHistories.fulfilled, (state, action) => {
+      state.loading = "success";
+      state.histories = action.payload;
+    });
+    builder.addCase(getAllTradeHistories.rejected, (state) => {
       state.loading = "failed";
     });
     builder.addCase(addToken.pending, (state) => {
