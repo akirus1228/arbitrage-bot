@@ -1,111 +1,118 @@
-import { ethers } from "ethers";
-import { MDBDataTableV5 } from "mdbreact";
-import { InputGroup, FormControl, Button, Modal } from "react-bootstrap";
-import { useSelector, useDispatch } from "react-redux";
-import React, { useState } from "react";
+import { ethers } from 'ethers';
+import React, { useState } from 'react';
+import { MDBDataTableV5 } from 'mdbreact';
+import { useSelector, useDispatch } from 'react-redux';
+import { InputGroup, FormControl, Button, Form, Modal } from 'react-bootstrap';
 
-import {
-  addToken,
-  removeToken,
-  updateToken,
-} from "../../store/reducers/app-slice";
+import { addToken, removeToken, updateToken } from '../../store/reducers/app-slice';
 
 const TokenList = ({ socket }) => {
   const dispatch = useDispatch();
-  const appData = useSelector((state) => state.app);
-  const [address, setAddress] = useState("");
+  const appData = useSelector(state => state.app);
+  const [address, setAddress] = useState('');
   const [show, setShow] = useState(false);
+  const [editModalVisiable, setEditModalVisiable] = useState(false);
+  const [selectedToken, setSelectedToken] = useState();
 
   const handleClose = () => {
     setShow(false);
-    setAddress("");
+    setAddress('');
   };
 
   const handleShow = () => setShow(true);
 
-  const handleAddress = (e) => {
+  const handleAddress = e => {
     setAddress(e.target.value);
   };
 
   const addTokenList = () => {
     setShow(false);
-    if (address === "") {
-      alert("Please check Address");
+    if (address === '') {
+      alert('Please check Address');
       return;
     } else {
       try {
         const checksumAddress = ethers.utils.getAddress(address);
         dispatch(addToken(checksumAddress));
       } catch (e) {
-        alert("Invalid token address");
+        alert('Invalid token address');
       }
     }
-    setAddress("");
+    setAddress('');
   };
 
-  const deleteTokenList = (id) => {
+  const deleteTokenList = id => {
     dispatch(removeToken(id));
   };
 
-  const setTokenActive = (crypto) => {
+  const setTokenActive = crypto => {
     dispatch(updateToken({ ...crypto, active: !crypto.active }));
   };
 
-  const rows = appData.tokens.map((crypto) => {
+  const showEditModal = (token, visible) => {
+    setSelectedToken(token);
+    setEditModalVisiable(visible);
+  };
+
+  const handleUpdate = token => {
+    dispatch(updateToken({ ...crypto, ...token }));
+    setEditModalVisiable(false);
+  };
+
+  const rows = appData.tokens.map(crypto => {
     const row = { ...crypto };
     row.actions = (
       <div>
         <Button
-          variant={`${crypto.active ? "primary" : "danger"}`}
+          variant={`${crypto.active ? 'primary' : 'danger'}`}
           size="sm"
-          value={crypto.active ? "Active" : "Disable"}
+          value={crypto.active ? 'Active' : 'Disable'}
           onClick={() => setTokenActive(crypto)}
         >
-          {!crypto.active ? "Active" : "Disable"}
+          {!crypto.active ? 'Active' : 'Disable'}
         </Button>
-        <Button
-          variant="outline-danger"
-          size="sm"
-          onClick={() => deleteTokenList(crypto.key)}
-        >
+        <Button variant={'primary'} size="sm" value={'Edit'} onClick={() => showEditModal(crypto, true)}>
+          {'Edit'}
+        </Button>
+        <Button variant="outline-danger" size="sm" onClick={() => deleteTokenList(crypto.key)}>
           Delete
         </Button>
       </div>
     );
-    row.active = row.active ? "Actived" : "Disabled";
+    row.active = row.active ? 'Actived' : 'Disabled';
     return row;
   });
 
   const data = {
     columns: [
       {
-        label: "No",
-        field: "id",
-        width: 150,
-      },
-      {
-        label: "Token Symbol",
-        field: "symbol",
-        width: 200,
-      },
-      {
-        label: "Token Address",
-        field: "address",
-        width: 270,
-      },
-      {
-        label: "Decimals",
-        field: "decimals",
+        label: 'No',
+        field: 'id',
         width: 50,
       },
       {
-        label: "Active",
-        field: "active",
+        label: 'Token Symbol',
+        field: 'symbol',
+        width: 50,
+      },
+      {
+        label: 'Token Address',
+        field: 'address',
+        width: 150,
+      },
+      {
+        label: 'Decimals',
+        field: 'decimals',
+        width: 50,
+      },
+      {
+        label: 'Active',
+        field: 'active',
         width: 270,
       },
       {
-        label: "Actions",
-        field: "actions",
+        label: 'Actions',
+        field: 'actions',
         width: 100,
       },
     ],
@@ -123,14 +130,7 @@ const TokenList = ({ socket }) => {
       </Button>
       <br />
       <br />
-      <MDBDataTableV5
-        hover
-        entriesOptions={[10, 20, 50, 100, 200, 500, 1000]}
-        entries={50}
-        pagesAmount={10}
-        data={data}
-        materialSearch
-      />
+      <MDBDataTableV5 hover entriesOptions={[10, 20, 50, 100, 200, 500, 1000]} entries={50} pagesAmount={10} data={data} materialSearch />
       <br />
       <br />
       <Modal show={show} onHide={handleClose}>
@@ -140,14 +140,7 @@ const TokenList = ({ socket }) => {
         <Modal.Body>
           <InputGroup className="mb-3">
             <InputGroup.Text id="basic-addon3">Address</InputGroup.Text>
-            <FormControl
-              id="basic-url1"
-              aria-describedby="basic-addon3"
-              type="text"
-              placeholder="0x"
-              defaultValue={address}
-              onChange={handleAddress}
-            />
+            <FormControl id="basic-url1" aria-describedby="basic-addon3" type="text" placeholder="0x" defaultValue={address} onChange={handleAddress} />
           </InputGroup>
         </Modal.Body>
         <Modal.Footer>
@@ -156,6 +149,121 @@ const TokenList = ({ socket }) => {
           </Button>
           <Button variant="primary" onClick={addTokenList}>
             Add token
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal show={editModalVisiable} onHide={() => setEditModalVisiable(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>{selectedToken ? `Edit Token - ${selectedToken.symbol}` : ''}</Modal.Title>
+        </Modal.Header>
+        {selectedToken && (
+          <Modal.Body>
+            <div className="row">
+              <div className="col-12">
+                <InputGroup className="mb-3">
+                  <InputGroup.Text id="basic-addon3">Address</InputGroup.Text>
+                  <Form.Control aria-describedby="basic-addon3" defaultValue={selectedToken.address} readOnly={true} />
+                </InputGroup>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-6">
+                <InputGroup className="mb-3">
+                  <InputGroup.Text id="basic-addon3">Symbol</InputGroup.Text>
+                  <Form.Control aria-describedby="basic-addon3" defaultValue={selectedToken.symbol} readOnly={true} />
+                </InputGroup>
+              </div>
+              <div className="col-6">
+                <InputGroup className="mb-3">
+                  <InputGroup.Text id="basic-addon3">Decimals</InputGroup.Text>
+                  <Form.Control aria-describedby="basic-addon3" defaultValue={selectedToken.decimals} readOnly={true} />
+                </InputGroup>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-12">
+                <InputGroup className="mb-3">
+                  <InputGroup.Text id="basic-addon3">Min amount</InputGroup.Text>
+                  <Form.Control
+                    id="basic-url"
+                    aria-describedby="basic-addon3"
+                    defaultValue={selectedToken.minAmount}
+                    type="number"
+                    pattern="^[0-9]*[.,].?[0-9]*"
+                    onChange={e =>
+                      setSelectedToken(prev => {
+                        return { ...prev, minAmount: e.target.value };
+                      })
+                    }
+                  />
+                </InputGroup>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-12">
+                <InputGroup className="mb-3">
+                  <InputGroup.Text id="basic-addon3">Max amount</InputGroup.Text>
+                  <Form.Control
+                    id="basic-url"
+                    aria-describedby="basic-addon3"
+                    defaultValue={selectedToken.maxAmount}
+                    type="number"
+                    pattern="^[0-9]*[.,].?[0-9]*"
+                    onChange={e =>
+                      setSelectedToken(prev => {
+                        return { ...prev, maxAmount: e.target.value };
+                      })
+                    }
+                  />
+                </InputGroup>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-12">
+                <InputGroup className="mb-3">
+                  <InputGroup.Text id="basic-addon3">{`ETH${selectedToken.symbol} Pool`}</InputGroup.Text>
+                  <Form.Control
+                    aria-describedby="basic-addon3"
+                    defaultValue={selectedToken.ethLimit}
+                    type="number"
+                    pattern="^[0-9]*[.,].?[0-9]*"
+                    onChange={e =>
+                      setSelectedToken(prev => {
+                        return { ...prev, ethLimit: e.target.value };
+                      })
+                    }
+                    placeholder="X ETH"
+                  />
+                </InputGroup>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-12">
+                <InputGroup className="mb-3">
+                  <InputGroup.Text id="basic-addon3">{`USDT${selectedToken.symbol} Pool`}</InputGroup.Text>
+                  <Form.Control
+                    aria-describedby="basic-addon3"
+                    defaultValue={selectedToken.usdtLimit}
+                    type="number"
+                    pattern="^[0-9]*[.,].?[0-9]*"
+                    onChange={e =>
+                      setSelectedToken(prev => {
+                        return { ...prev, usdtLimit: e.target.value };
+                      })
+                    }
+                    placeholder="X USDT"
+                  />
+                </InputGroup>
+              </div>
+            </div>
+          </Modal.Body>
+        )}
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setEditModalVisiable(false)}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={() => handleUpdate(selectedToken)}>
+            Ok
           </Button>
         </Modal.Footer>
       </Modal>

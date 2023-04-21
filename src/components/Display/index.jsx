@@ -3,28 +3,21 @@ import { FiMonitor } from 'react-icons/fi';
 import { BsClockHistory } from 'react-icons/bs';
 import { GiReceiveMoney } from 'react-icons/gi';
 import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { Button, InputGroup, Form, Modal, Card } from 'react-bootstrap';
+import { useSelector } from 'react-redux';
+import { Button, Modal, Card } from 'react-bootstrap';
 
 import { database } from '../../config/firebase';
 import { historyDatabaseURL } from '../../utils/basic';
-import { updateToken } from '../../store/reducers/app-slice';
 
 const Display = ({ socket }) => {
-  const dispatch = useDispatch();
   const appData = useSelector(state => state.app);
-  const [show, setShow] = useState(false);
   const [selectedLog, setSelectedLog] = useState({});
   const [detailShow, setDetailShow] = useState(false);
   const [isLogDialogFlog, setLogDialogFlog] = useState(false);
-  const [selectedToken, setToken] = useState({});
-  const [minAmount, setMinAmount] = useState(0);
-  const [maxAmount, setMaxAmount] = useState(100);
   const [tokenLists, setTokenLists] = useState([]);
   const [priceData, setPriceData] = useState([]);
   const [logData, setLogData] = useState([]);
   const [executionState, setExecutionState] = useState(false);
-  const inputRegex = RegExp(`^\\d*(?:\\\\[.])?\\d*$`);
 
   useEffect(() => {
     if (appData.loading === 'success') {
@@ -79,49 +72,6 @@ const Display = ({ socket }) => {
     setLogDialogFlog(false);
   };
 
-  const handleClose = () => {
-    setShow(false);
-  };
-
-  const handleOK = () => {
-    if (Number(minAmount) < Number(maxAmount)) {
-      dispatch(updateToken({ ...selectedToken, minAmount: Number(minAmount), maxAmount: Number(maxAmount) }));
-      setTokenLists(tokenList => {
-        tokenList.map(token => {
-          if (token === selectedToken) {
-            return { ...token, minAmount: Number(minAmount), maxAmount: Number(maxAmount) };
-          } else {
-            return token;
-          }
-        });
-        return tokenList;
-      });
-    }
-    setShow(false);
-  };
-
-  const handleMaxAmount = value => {
-    if (inputRegex.test(value)) {
-      setMaxAmount(value);
-    }
-  };
-
-  const handleMinAmount = value => {
-    if (inputRegex.test(value)) {
-      setMinAmount(value);
-    }
-  };
-
-  const showSettingAmountModel = tokenAddress => {
-    if (executionState) {
-      alert(`Bot is running with current setting. Please stop it first.`);
-      return;
-    }
-    setShow(true);
-    const token = tokenLists.filter(tokenList => tokenList.address === tokenAddress)[0];
-    setToken(token);
-  };
-
   const showHistoryDetail = log => {
     setDetailShow(true);
     setSelectedLog(log);
@@ -131,14 +81,6 @@ const Display = ({ socket }) => {
     const token = { ...tokenList };
     token.min_amount = tokenList.minAmount;
     token.max_amount = tokenList.maxAmount;
-    token.actions = (
-      <div>
-        <Button variant="outline-success" size="sm" onClick={() => showSettingAmountModel(tokenList.address)}>
-          {' '}
-          Edit
-        </Button>{' '}
-      </div>
-    );
     return token;
   });
 
@@ -225,8 +167,12 @@ const Display = ({ socket }) => {
         field: 'max_amount',
       },
       {
-        label: 'Edit',
-        field: 'actions',
+        label: 'Monitoring Limit(ETH)',
+        field: 'ethLimit',
+      },
+      {
+        label: 'Monitoring Limit(USDT)',
+        field: 'usdtLimit',
       },
     ],
     rows: tokenSettingData,
@@ -328,13 +274,18 @@ const Display = ({ socket }) => {
   const receiveBotStatusSignal = data => {
     setExecutionState(data.status);
   };
-
+  const test = data => {
+    console.log(data);
+  };
   useEffect(() => {
     socket.on('bot-status', receiveBotStatusSignal);
     socket.on('price-signal', receivePriceSignal);
 
+    socket.on('price-test', test);
+
     return () => {
       socket.off('price-signal');
+      socket.off('price-test');
       socket.off('bot-status');
     };
   });
@@ -412,57 +363,6 @@ const Display = ({ socket }) => {
           </Button>
           <Button variant="primary" onClick={() => clearLog()}>
             Yes
-          </Button>
-        </Modal.Footer>
-      </Modal>
-      <Modal show={show} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Setting Token Amounts</Modal.Title>
-        </Modal.Header>
-        {
-          <Modal.Body>
-            <div className="row">
-              <div className="col-12">
-                <InputGroup className="mb-3">
-                  <InputGroup.Text id="basic-addon3">Min amount</InputGroup.Text>
-                  <Form.Control
-                    id="basic-url"
-                    aria-describedby="basic-addon3"
-                    defaultValue={selectedToken.minAmount}
-                    type="number"
-                    pattern="^[0-9]*[.,].?[0-9]*"
-                    onChange={e => handleMinAmount(e.target.value)}
-                    placeholder="Loan Amount  X ETH X is integer"
-                  />
-                </InputGroup>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-12">
-                <InputGroup className="mb-3">
-                  <InputGroup.Text id="basic-addon3">Max amount</InputGroup.Text>
-                  <Form.Control
-                    id="basic-url"
-                    aria-describedby="basic-addon3"
-                    defaultValue={selectedToken.maxAmount}
-                    type="number"
-                    pattern="^[0-9]*[.,].?[0-9]*"
-                    onChange={e => {
-                      handleMaxAmount(e.target.value);
-                    }}
-                    placeholder="Loan Amount  X ETH X is integer"
-                  />
-                </InputGroup>
-              </div>
-            </div>
-          </Modal.Body>
-        }
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={handleOK}>
-            Ok
           </Button>
         </Modal.Footer>
       </Modal>
