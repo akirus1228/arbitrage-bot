@@ -106,9 +106,19 @@ const TokenList = ({ socket }) => {
         width: 50,
       },
       {
-        label: 'Active',
-        field: 'active',
-        width: 270,
+        label: 'Min Amount',
+        field: 'minAmount',
+        width: 50,
+      },
+      {
+        label: 'Max Amount',
+        field: 'maxAmount',
+        width: 50,
+      },
+      {
+        label: 'Monitoring Limit',
+        field: 'monitLimit',
+        width: 50,
       },
       {
         label: 'Actions',
@@ -221,37 +231,17 @@ const TokenList = ({ socket }) => {
             <div className="row">
               <div className="col-12">
                 <InputGroup className="mb-3">
-                  <InputGroup.Text id="basic-addon3">{`ETH${selectedToken.symbol} Pool`}</InputGroup.Text>
+                  <InputGroup.Text id="basic-addon3">{`Swap monitoring limit`}</InputGroup.Text>
                   <Form.Control
                     aria-describedby="basic-addon3"
-                    defaultValue={selectedToken.ethLimit}
+                    defaultValue={selectedToken.monitLimit}
                     type="number"
                     pattern="^[0-9]*[.,].?[0-9]*"
                     onChange={e =>
                       setSelectedToken(prev => {
-                        return { ...prev, ethLimit: e.target.value };
+                        return { ...prev, monitLimit: e.target.value };
                       })
                     }
-                    placeholder="X ETH"
-                  />
-                </InputGroup>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-12">
-                <InputGroup className="mb-3">
-                  <InputGroup.Text id="basic-addon3">{`USDT${selectedToken.symbol} Pool`}</InputGroup.Text>
-                  <Form.Control
-                    aria-describedby="basic-addon3"
-                    defaultValue={selectedToken.usdtLimit}
-                    type="number"
-                    pattern="^[0-9]*[.,].?[0-9]*"
-                    onChange={e =>
-                      setSelectedToken(prev => {
-                        return { ...prev, usdtLimit: e.target.value };
-                      })
-                    }
-                    placeholder="X USDT"
                   />
                 </InputGroup>
               </div>

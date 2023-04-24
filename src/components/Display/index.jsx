@@ -167,12 +167,8 @@ const Display = ({ socket }) => {
         field: 'max_amount',
       },
       {
-        label: 'Monitoring Limit(ETH)',
-        field: 'ethLimit',
-      },
-      {
-        label: 'Monitoring Limit(USDT)',
-        field: 'usdtLimit',
+        label: 'Monitoring Limit',
+        field: 'monitLimit',
       },
     ],
     rows: tokenSettingData,

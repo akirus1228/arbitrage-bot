@@ -69,6 +69,7 @@ export const addToken = createAsyncThunk(
         active: true,
         minAmount: 0,
         maxAmount: 0,
+        monitLimit: 0,
       };
       await database.ref(addressDatabaseURL).push().set(newToken);
     } else {
@@ -86,6 +87,7 @@ export const addToken = createAsyncThunk(
           active: true,
           minAmount: 0,
           maxAmount: 0,
+          monitLimit: 0,
         };
         await database.ref(addressDatabaseURL).push().set(newToken);
       }
