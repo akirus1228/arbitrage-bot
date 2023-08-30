@@ -302,6 +302,7 @@ const Display = ({ socket }) => {
                   {' '}
                   <GiReceiveMoney /> &nbsp; Trading Amount
                 </h2>{' '}
+                <div>
                 <Button variant={executionState ? 'danger' : 'success'} id="button-addon2" onClick={executionState ? () => stop() : () => start()}>
                   {executionState ? 'Stop' : 'Start'}
                 </Button>
@@ -311,6 +312,7 @@ const Display = ({ socket }) => {
                       Hard Stop
                     </Button>)
                 }
+                </div>
               </div>
               <div className="col-12">
                 <MDBDataTableV5 hover searching={false} entries={50} pagesAmount={10} data={dataTokenSettingTable} />
