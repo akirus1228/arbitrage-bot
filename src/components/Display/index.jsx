@@ -68,6 +68,11 @@ const Display = ({ socket }) => {
     setExecutionState(false);
   };
 
+  const hardStop = () => {
+    socket.emit('force stop');
+    setExecutionState(false);
+  }
+
   const clearLog = () => {
     setLogDialogFlog(false);
   };
@@ -300,6 +305,12 @@ const Display = ({ socket }) => {
                 <Button variant={executionState ? 'danger' : 'success'} id="button-addon2" onClick={executionState ? () => stop() : () => start()}>
                   {executionState ? 'Stop' : 'Start'}
                 </Button>
+                {
+                  executionState && (
+                    <Button variant={'danger'} id="button-addon3" onClick={() => hardStop()}>
+                      Hard Stop
+                    </Button>)
+                }
               </div>
               <div className="col-12">
                 <MDBDataTableV5 hover searching={false} entries={50} pagesAmount={10} data={dataTokenSettingTable} />
