@@ -69,7 +69,7 @@ const Display = ({ socket }) => {
   };
 
   const hardStop = () => {
-    socket.emit('force stop');
+    socket.emit('bot-hard-stop');
     setExecutionState(false);
   }
 
