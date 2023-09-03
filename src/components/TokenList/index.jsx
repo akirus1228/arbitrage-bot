@@ -116,6 +116,11 @@ const TokenList = ({ socket }) => {
         width: 50,
       },
       {
+        label: 'Benefit Limit',
+        field: 'benefitLimit',
+        width: 50,
+      },
+      {
         label: 'Monitoring Limit',
         field: 'monitLimit',
         width: 50,
@@ -222,6 +227,24 @@ const TokenList = ({ socket }) => {
                     onChange={e =>
                       setSelectedToken(prev => {
                         return { ...prev, maxAmount: e.target.value };
+                      })
+                    }
+                  />
+                </InputGroup>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-12">
+                <InputGroup className="mb-3">
+                  <InputGroup.Text id="basic-addon3">{`Benefit limit`}</InputGroup.Text>
+                  <Form.Control
+                    aria-describedby="basic-addon3"
+                    defaultValue={selectedToken.benefitLimit}
+                    type="number"
+                    pattern="^[0-9]*[.,].?[0-9]*"
+                    onChange={e =>
+                      setSelectedToken(prev => {
+                        return { ...prev, benefitLimit: e.target.value };
                       })
                     }
                   />

@@ -172,6 +172,10 @@ const Display = ({ socket }) => {
         field: 'max_amount',
       },
       {
+        label: 'Benefit Limit(USDT)',
+        field: 'benefitLimit',
+      },
+      {
         label: 'Monitoring Limit',
         field: 'monitLimit',
       },
