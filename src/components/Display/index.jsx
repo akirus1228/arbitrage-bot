@@ -4,7 +4,7 @@ import { BsClockHistory } from 'react-icons/bs';
 import { GiReceiveMoney } from 'react-icons/gi';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Button, Modal, Card } from 'react-bootstrap';
+import { Button, Modal, Card, Form } from 'react-bootstrap';
 
 import { database } from '../../config/firebase';
 import { historyDatabaseURL } from '../../utils/basic';
@@ -18,6 +18,7 @@ const Display = ({ socket }) => {
   const [priceData, setPriceData] = useState([]);
   const [logData, setLogData] = useState([]);
   const [executionState, setExecutionState] = useState(false);
+  const [slippage, setSlippage] = useState('0.5');
 
   useEffect(() => {
     if (appData.loading === 'success') {
@@ -59,7 +60,7 @@ const Display = ({ socket }) => {
   };
 
   const start = () => {
-    socket.emit('start');
+    socket.emit('start', { slippage });
     setExecutionState(true);
   };
 
@@ -277,7 +278,11 @@ const Display = ({ socket }) => {
   };
 
   const receiveBotStatusSignal = data => {
+    console.log("data", data);
     setExecutionState(data.status);
+    if(data.slippage) {
+      setSlippage(data.slippage);
+    }
   };
   const test = data => {
     console.log(data);
@@ -306,16 +311,27 @@ const Display = ({ socket }) => {
                   {' '}
                   <GiReceiveMoney /> &nbsp; Trading Amount
                 </h2>{' '}
-                <div>
-                <Button variant={executionState ? 'danger' : 'success'} id="button-addon2" onClick={executionState ? () => stop() : () => start()}>
-                  {executionState ? 'Stop' : 'Start'}
-                </Button>
-                {
-                  executionState && (
-                    <Button variant={'danger'} id="button-addon3" onClick={() => hardStop()}>
-                      Hard Stop
-                    </Button>)
-                }
+                <div style={{display: "flex"}}>
+                  <Form.Group style={{marginBottom: "0", display: "flex", alignItems: "center"}}>
+                    <Form.Control
+                      as="select"
+                      value={slippage}
+                      onChange={e => { setSlippage(e.target.value); }}
+                    >
+                      <option value="0.1">0.1</option>
+                      <option value="0.5">0.5</option>
+                      <option value="1">1</option>
+                    </Form.Control>
+                  </Form.Group>
+                  <Button variant={executionState ? 'danger' : 'success'} id="button-addon2" onClick={executionState ? () => stop() : () => start()}>
+                    {executionState ? 'Stop' : 'Start'}
+                  </Button>
+                  {
+                    executionState && (
+                      <Button variant={'danger'} id="button-addon3" onClick={() => hardStop()}>
+                        Hard Stop
+                      </Button>)
+                  }
                 </div>
               </div>
               <div className="col-12">
